@@ -1,0 +1,15 @@
+[Unit]
+Description=Alkira Radar Next.js
+After=network.target
+
+[Service]
+Type=simple
+User=radar
+WorkingDirectory=/opt/radar/web
+EnvironmentFile=/opt/radar/.env
+ExecStart=/usr/bin/npm start --prefix /opt/radar/web
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
