@@ -1,0 +1,12 @@
+services:
+  radar-api:
+    build: ./api
+    env_file: .env
+    network_mode: host
+    restart: unless-stopped
+
+  radar-web:
+    build: ./web
+    env_file: .env
+    network_mode: host
+    restart: unless-stopped
