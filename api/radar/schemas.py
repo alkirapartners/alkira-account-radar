@@ -1,7 +1,7 @@
 from __future__ import annotations
 import json
 from typing import Literal, Optional
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class AgentOutput(BaseModel):
@@ -45,6 +45,11 @@ class ResultRow(BaseModel):
     sources: list[str] = Field(default_factory=list)
     status: Literal["pending", "done", "error"] = "pending"
     error_message: Optional[str] = None
+
+    @field_validator("sources", mode="before")
+    @classmethod
+    def _coerce_null_sources(cls, v):
+        return v if v is not None else []
 
 
 class BatchResponse(BaseModel):

@@ -22,10 +22,9 @@ def upload() -> str:
     skill_md = (SKILL_DIR / "SKILL.md").read_text()
     print(f"Uploading skill from {SKILL_DIR}...")
     skill = client.beta.skills.create(
-        name="alkira-radar-rubric",
-        display_name="Alkira Radar Rubric",
-        description="1-10 scoring rubric and JSON output schema for the Radar tool",
-        files=[{"name": "SKILL.md", "content": skill_md}],
+        display_title="Alkira Radar Rubric",
+        files=[("alkira-radar-rubric/SKILL.md", skill_md.encode("utf-8"), "text/markdown")],
+        betas=["skills-2025-10-02"],
     )
     print(f"  Skill ID: {skill.id}")
     return skill.id

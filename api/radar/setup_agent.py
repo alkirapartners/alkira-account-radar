@@ -47,6 +47,7 @@ def main() -> None:
             ],
         }],
         skills=skills,
+        betas=["managed-agents-2026-04-01", "skills-2025-10-02"],
     )
     print(f"  Agent ID: {agent.id}")
 
@@ -54,6 +55,7 @@ def main() -> None:
     environment = client.beta.environments.create(
         name="alkira-radar-env",
         config={"type": "cloud", "networking": {"type": "unrestricted"}},
+        betas=["managed-agents-2026-04-01"],
     )
     print(f"  Environment ID: {environment.id}")
 
