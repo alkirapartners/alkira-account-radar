@@ -9,13 +9,22 @@ class AgentError(RuntimeError):
     pass
 
 
-def _extract_text(run) -> str:
-    for block in getattr(run, "output", []) or []:
-        if isinstance(block, dict) and block.get("type") == "text":
-            return block.get("text", "")
-        if getattr(block, "type", None) == "text":
-            return getattr(block, "text", "")
-    raise AgentError("Agent run returned no text block")
+_TERMINAL_EVENT_TYPES = frozenset({
+    "session.status_idle",
+    "session.status_terminated",
+    "session.error",
+})
+
+
+def _extract_event_text(event) -> str:
+    parts: list[str] = []
+    for block in getattr(event, "content", []) or []:
+        if isinstance(block, dict):
+            if block.get("type") == "text":
+                parts.append(block.get("text", ""))
+        elif getattr(block, "type", None) == "text":
+            parts.append(getattr(block, "text", ""))
+    return "".join(parts)
 
 
 def _parse(text: str) -> AgentOutput:
@@ -28,7 +37,13 @@ def _parse(text: str) -> AgentOutput:
 
 
 class AgentClient:
-    """Async wrapper around anthropic.beta.agents.runs.create with one retry."""
+    """Async wrapper around the Anthropic Managed Agents sessions API with one retry.
+
+    Each call to score_account creates a session, sends the account name as a
+    user.message event, and streams session events until the agent reports
+    session.status.idle. The concatenated text from agent.message events is
+    parsed as JSON into AgentOutput.
+    """
 
     def __init__(self, anthropic, agent_id: str, env_id: str, retry_delay: float = 5.0):
         self.anthropic = anthropic
@@ -40,17 +55,44 @@ class AgentClient:
         last_err: Optional[Exception] = None
         for attempt in (1, 2):
             try:
-                run = await self.anthropic.beta.agents.runs.create(
-                    agent_id=self.agent_id,
+                session = await self.anthropic.beta.sessions.create(
+                    agent=self.agent_id,
                     environment_id=self.env_id,
-                    input=account_name,
                 )
-                return _parse(_extract_text(run)), getattr(run, "id", "")
+                await self.anthropic.beta.sessions.events.send(
+                    session_id=session.id,
+                    events=[{
+                        "type": "user.message",
+                        "content": [{"type": "text", "text": account_name}],
+                    }],
+                )
+                text = await self._collect_agent_text(session.id)
+                return _parse(text), session.id
             except Exception as e:
                 last_err = e
                 if attempt == 1 and self.retry_delay > 0:
                     await asyncio.sleep(self.retry_delay)
         raise AgentError(f"Agent failed after retry: {last_err}") from last_err
+
+    async def _collect_agent_text(self, session_id: str) -> str:
+        chunks: list[str] = []
+        stream = await self.anthropic.beta.sessions.events.stream(session_id=session_id)
+        try:
+            async for event in stream:
+                etype = getattr(event, "type", None)
+                if etype == "agent.message":
+                    chunks.append(_extract_event_text(event))
+                elif etype in _TERMINAL_EVENT_TYPES:
+                    break
+        finally:
+            close = getattr(stream, "close", None)
+            if callable(close):
+                result = close()
+                if asyncio.iscoroutine(result):
+                    await result
+        if not chunks:
+            raise AgentError("Agent session produced no text response")
+        return "".join(chunks)
 
 
 def make_client_from_env(anthropic) -> AgentClient:
