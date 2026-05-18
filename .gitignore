@@ -1,0 +1,46 @@
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# node / next.js
+node_modules/
+.next/
+out/
+dist/
+build/
+*.log
+.npm/
+.pnpm-store/
+
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.egg-info/
+
+# os
+.DS_Store
+Thumbs.db
+
+# editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# superpowers brainstorm artifacts
+.superpowers/
+
+# misc
+.cache/
