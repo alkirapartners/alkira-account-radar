@@ -5,7 +5,7 @@ create table radar_batches (
   input_count int not null,
   unique_count int not null,
   status text not null default 'running' check (status in ('running','done','error')),
-  created_at timestamptz default now(),
+  created_at timestamptz not null default now(),
   completed_at timestamptz
 );
 
@@ -23,7 +23,7 @@ create table radar_results (
   agent_run_id text,
   status text not null default 'pending' check (status in ('pending','done','error')),
   error_message text,
-  created_at timestamptz default now(),
+  created_at timestamptz not null default now(),
   completed_at timestamptz
 );
 
@@ -40,7 +40,8 @@ create policy radar_batches_select on radar_batches for select
 create policy radar_batches_insert on radar_batches for insert
   with check (partner_email = current_setting('request.jwt.claims', true)::json->>'email');
 create policy radar_batches_update on radar_batches for update
-  using (partner_email = current_setting('request.jwt.claims', true)::json->>'email');
+  using (partner_email = current_setting('request.jwt.claims', true)::json->>'email')
+  with check (partner_email = current_setting('request.jwt.claims', true)::json->>'email');
 
 create policy radar_results_select on radar_results for select
   using (exists (
@@ -56,6 +57,11 @@ create policy radar_results_insert on radar_results for insert
   ));
 create policy radar_results_update on radar_results for update
   using (exists (
+    select 1 from radar_batches b
+    where b.id = radar_results.batch_id
+      and b.partner_email = current_setting('request.jwt.claims', true)::json->>'email'
+  ))
+  with check (exists (
     select 1 from radar_batches b
     where b.id = radar_results.batch_id
       and b.partner_email = current_setting('request.jwt.claims', true)::json->>'email'
