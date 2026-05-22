@@ -7,6 +7,7 @@ Type=simple
 User=radar
 WorkingDirectory=/opt/radar/web
 EnvironmentFile=/opt/radar/.env
+Environment=PORT=3001
 ExecStart=/usr/bin/npm start --prefix /opt/radar/web
 Restart=on-failure
 RestartSec=5s

@@ -8,8 +8,7 @@ import { createBatch, fetchHistory } from "@/lib/api-client";
 import { subscribeToBatch } from "@/lib/sse-client";
 import type { BatchSummary, ResultRow } from "@/lib/types";
 
-const BRIEFGEN_URL =
-  process.env.NEXT_PUBLIC_BRIEFGEN_URL ?? "https://briefgen.partners.alkira.cc";
+const BRIEFGEN_URL = process.env.NEXT_PUBLIC_BRIEFGEN_URL ?? "";
 
 export default function Home() {
   const [history, setHistory] = useState<BatchSummary[]>([]);

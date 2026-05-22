@@ -54,23 +54,60 @@ Open http://localhost:3000. Locally, auth is bypassed — pass `X-Auth-Email: de
 
 ## Production deploy
 
-### Docker Compose
+Radar mounts under `/radar` on the same `briefgen.partners.alkira.cc` host
+as brief-gen. It piggybacks on brief-gen's nginx, TLS cert, and auth proxy.
+No separate subdomain or certbot run is needed.
+
+### On the shared EC2 host (first-time install)
 
 ```bash
-docker compose up -d --build
-sudo cp deploy/nginx/radar.partners.alkira.cc.conf /etc/nginx/sites-available/
-sudo ln -s /etc/nginx/sites-available/radar.partners.alkira.cc.conf /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d radar.partners.alkira.cc
-```
+sudo git clone https://github.com/blake-hays/alkira-account-radar.git /opt/radar
+# scp your local .env to /opt/radar/.env first
+sudo chown -R radar:radar /opt/radar
+cd /opt/radar
 
-### systemd
+# Option A — Docker Compose
+sudo docker compose up -d --build
 
-```bash
+# Option B — systemd
 sudo cp deploy/systemd/*.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now radar-api radar-web
-# Same nginx + certbot steps as above
+```
+
+### Nginx (lives in the brief-gen repo, not here)
+
+Add two `location` blocks inside brief-gen's existing
+`briefgen.partners.alkira.cc` server block, above the catch-all `location /`,
+so they inherit the existing `auth_request /auth-check`:
+
+```nginx
+location /api/radar/ {
+  proxy_pass http://127.0.0.1:8601;
+  proxy_buffering off;
+  proxy_read_timeout 600s;
+  proxy_http_version 1.1;
+}
+
+location /radar/ {
+  proxy_pass http://127.0.0.1:3001;
+  proxy_http_version 1.1;
+  proxy_set_header Upgrade $http_upgrade;
+  proxy_set_header Connection "upgrade";
+}
+```
+
+Then: `sudo nginx -t && sudo systemctl reload nginx`.
+
+### Auto-update
+
+Extend brief-gen's existing deploy hook to also pull and restart radar:
+
+```bash
+cd /opt/radar && git pull --ff-only
+sudo systemctl restart radar-api radar-web
+# OR with docker compose:
+cd /opt/radar && git pull --ff-only && sudo docker compose up -d --build
 ```
 
 ## Tests

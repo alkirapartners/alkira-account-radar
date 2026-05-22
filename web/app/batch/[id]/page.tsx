@@ -5,8 +5,7 @@ import { ResultsTable, summarize } from "@/components/results-table";
 import type { Batch } from "@/lib/types";
 
 const API_INTERNAL = process.env.RADAR_API_INTERNAL ?? "http://127.0.0.1:8601";
-const BRIEFGEN_URL =
-  process.env.NEXT_PUBLIC_BRIEFGEN_URL ?? "https://briefgen.partners.alkira.cc";
+const BRIEFGEN_URL = process.env.NEXT_PUBLIC_BRIEFGEN_URL ?? "";
 
 async function loadBatch(id: string, authEmail: string | null): Promise<Batch | null> {
   const res = await fetch(`${API_INTERNAL}/api/radar/batch/${encodeURIComponent(id)}`, {
