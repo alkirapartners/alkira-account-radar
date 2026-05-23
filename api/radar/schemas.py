@@ -33,10 +33,6 @@ class BatchCreateRequest(BaseModel):
     raw: str = Field(min_length=1, max_length=20_000)
 
 
-class BatchLabelRequest(BaseModel):
-    label: str = Field(default="", max_length=200)
-
-
 class ResultRow(BaseModel):
     id: str
     account_name: str
