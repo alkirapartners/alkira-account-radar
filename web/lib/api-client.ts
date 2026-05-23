@@ -26,13 +26,3 @@ export async function fetchBatch(batchId: string): Promise<Batch> {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
-
-export async function renameBatch(batchId: string, label: string): Promise<void> {
-  const res = await fetch(`${BASE}/batch/${encodeURIComponent(batchId)}/label`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ label }),
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-}
