@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { InputForm } from "@/components/input-form";
 import { HistorySidebar } from "@/components/history-sidebar";
 import { ResultsTable, summarize } from "@/components/results-table";
-import { createBatch, fetchHistory } from "@/lib/api-client";
+import { createBatch, fetchHistory, renameBatch } from "@/lib/api-client";
 import { subscribeToBatch } from "@/lib/sse-client";
 import type { BatchSummary, ResultRow } from "@/lib/types";
 
@@ -28,7 +28,11 @@ export default function Home() {
 
     const sub = subscribeToBatch(id, (ev) => {
       if (ev.type === "pending") {
-        setRows((prev) => prev.some((r) => r.id === (ev.row as ResultRow).id) ? prev : [...prev, ev.row as ResultRow]);
+        setRows((prev) =>
+          prev.some((r) => r.id === (ev.row as ResultRow).id)
+            ? prev
+            : [...prev, ev.row as ResultRow],
+        );
       } else if (ev.type === "result") {
         setRows((prev) =>
           prev.map((r) => (r.id === ev.row?.id ? { ...r, ...(ev.row as ResultRow) } : r)),
@@ -41,6 +45,20 @@ export default function Home() {
     });
   }
 
+  async function handleRename(batchId: string, label: string) {
+    // Optimistic update
+    setHistory((prev) =>
+      prev.map((b) => (b.id === batchId ? { ...b, label } : b)),
+    );
+    try {
+      await renameBatch(batchId, label);
+    } catch (e) {
+      console.error("rename failed", e);
+      // Revert on failure
+      fetchHistory().then(setHistory).catch(console.error);
+    }
+  }
+
   const summary = summarize(rows);
   const completed = rows.length - summary.pending;
 
@@ -48,7 +66,11 @@ export default function Home() {
     <div className="grid min-h-screen grid-cols-1 md:grid-cols-[260px_1fr]">
       <aside className="border-r border-ink/10 bg-white p-6">
         <h1 className="mb-6 text-lg font-bold">Account Radar</h1>
-        <HistorySidebar batches={history} activeId={currentBatchId ?? undefined} />
+        <HistorySidebar
+          batches={history}
+          activeId={currentBatchId ?? undefined}
+          onRename={handleRename}
+        />
       </aside>
 
       <main className="space-y-8 p-8">
