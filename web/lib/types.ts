@@ -30,7 +30,6 @@ export interface BatchSummary {
   status: BatchStatus;
   unique_count: number;
   created_at: string;
-  label?: string | null;
 }
 
 export type SSEEvent =
