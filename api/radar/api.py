@@ -9,7 +9,7 @@ from radar import auth, db
 from radar.agent_client import make_client_from_env
 from radar.orchestrator import RadarOrchestrator
 from radar.parser import ParseError, parse_accounts
-from radar.schemas import BatchCreateRequest, BatchResponse, ResultRow
+from radar.schemas import BatchCreateRequest, BatchLabelRequest, BatchResponse, ResultRow
 from radar.sse import bus
 
 RepoFactory = Callable[[], db.RadarRepo]
@@ -51,7 +51,8 @@ def build_app(
         batch = repo.create_batch(
             partner_email=partner_email,
             input_raw=req.raw,
-            input_count=len([s for s in req.raw.replace(",", "\n").splitlines() if s.strip()]),
+            input_count=len([s for s in req.raw.replace(",", "
+").splitlines() if s.strip()]),
             unique_count=unique,
         )
         orch = orchestrator_factory(repo)
@@ -102,6 +103,19 @@ def build_app(
             created_at=batch["created_at"], completed_at=batch.get("completed_at"),
             results=[ResultRow(**r) for r in results],
         )
+
+
+    @app.patch("/api/radar/batch/{batch_id}/label")
+    async def rename_batch_label(
+        batch_id: str,
+        req: BatchLabelRequest,
+        partner_email: str = Depends(auth.require_partner_email),
+    ) -> dict:
+        repo = repo_factory()
+        ok = repo.rename_batch(batch_id, partner_email, req.label.strip())
+        if not ok:
+            raise HTTPException(status_code=404, detail="not found")
+        return {"ok": True}
 
     @app.get("/api/radar/health")
     async def health() -> dict:
