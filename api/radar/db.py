@@ -71,6 +71,15 @@ class RadarRepo:
             "completed_at": datetime.now(timezone.utc).isoformat(),
         }).eq("id", batch_id).execute()
 
+    def rename_batch(self, batch_id: str, partner_email: str, label: str) -> bool:
+        self._set_partner_jwt(partner_email)
+        res = (self.c.table("radar_batches")
+               .update({"label": label})
+               .eq("id", batch_id)
+               .eq("partner_email", partner_email)
+               .execute())
+        return bool(res.data)
+
     def get_batch(self, batch_id: str, partner_email: str) -> Optional[dict]:
         self._set_partner_jwt(partner_email)
         res = self.c.table("radar_batches").select("*").eq("id", batch_id).execute()
