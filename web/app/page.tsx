@@ -28,7 +28,7 @@ export default function Home() {
 
     const sub = subscribeToBatch(id, (ev) => {
       if (ev.type === "pending") {
-        setRows((prev) => [...prev, ev.row as ResultRow]);
+        setRows((prev) => prev.some((r) => r.id === (ev.row as ResultRow).id) ? prev : [...prev, ev.row as ResultRow]);
       } else if (ev.type === "result") {
         setRows((prev) =>
           prev.map((r) => (r.id === ev.row?.id ? { ...r, ...(ev.row as ResultRow) } : r)),
