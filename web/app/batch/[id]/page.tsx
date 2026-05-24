@@ -29,7 +29,7 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 p-8">
-      <Link href="/radar/" className="text-sm text-accent hover:underline">← Back to new batch</Link>
+      <Link href="/" className="text-sm text-accent hover:underline">← Back to new batch</Link>
       <header>
         <h1 className="text-2xl font-bold">Batch {batch.id.slice(0, 8)}</h1>
         <p className="text-sm text-ink/60">
