@@ -83,9 +83,12 @@ class RadarRepo:
 
     def list_batches(self, partner_email: str, limit: int = 50) -> list[dict]:
         self._set_partner_jwt(partner_email)
-        res = (self.c.table("radar_batches").select("*")
+        res = (self.c.table("radar_batches")
+               .select("*, radar_results!inner(id)")
                .eq("partner_email", partner_email)
                .order("created_at", desc=True).limit(limit).execute())
+        for b in res.data:
+            b.pop("radar_results", None)
         return res.data
 
     def count_batches_today(self, partner_email: str) -> int:
