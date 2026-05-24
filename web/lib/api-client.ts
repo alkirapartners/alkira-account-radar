@@ -26,3 +26,11 @@ export async function fetchBatch(batchId: string): Promise<Batch> {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
+
+export async function deleteResult(resultId: string): Promise<void> {
+  const res = await fetch(`${BASE}/result/${encodeURIComponent(resultId)}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+}

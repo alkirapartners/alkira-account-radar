@@ -97,3 +97,20 @@ class RadarRepo:
                .eq("partner_email", partner_email)
                .gte("created_at", midnight).execute())
         return res.count or 0
+
+    def delete_result(self, result_id: str, partner_email: str) -> bool:
+        """Delete a result row after verifying the caller owns the parent batch.
+        Uses service-role (no JWT override) so no DELETE RLS policy is needed.
+        Ownership is enforced by joining radar_batches in the existence check.
+        """
+        res = (self.c.table("radar_results")
+               .select("id, batch_id, radar_batches!inner(partner_email)")
+               .eq("id", result_id)
+               .execute())
+        if not res.data:
+            return False
+        batch_email = (res.data[0].get("radar_batches") or {}).get("partner_email", "")
+        if batch_email.lower() != partner_email.lower():
+            return False
+        self.c.table("radar_results").delete().eq("id", result_id).execute()
+        return True

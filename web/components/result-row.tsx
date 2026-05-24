@@ -4,9 +4,10 @@ import type { ResultRow as Row } from "@/lib/types";
 interface Props {
   row: Row;
   briefgenUrl: string;
+  onDelete?: (id: string) => void;
 }
 
-export function ResultRow({ row, briefgenUrl }: Props) {
+export function ResultRow({ row, briefgenUrl, onDelete }: Props) {
   const isPending = row.status === "pending";
   const isError = row.status === "error";
 
@@ -33,14 +34,25 @@ export function ResultRow({ row, briefgenUrl }: Props) {
             ) : null}
           </div>
         </div>
-        {handoff ? (
-          <a
-            href={handoff}
-            className="rounded-md border border-ink/15 px-3 py-1.5 text-sm font-medium hover:bg-ink/5"
-          >
-            Generate brief →
-          </a>
-        ) : null}
+        <div className="flex items-center gap-2">
+          {handoff ? (
+            <a
+              href={handoff}
+              className="rounded-md border border-ink/15 px-3 py-1.5 text-sm font-medium hover:bg-ink/5"
+            >
+              Generate brief →
+            </a>
+          ) : null}
+          {onDelete && !isPending ? (
+            <button
+              onClick={() => onDelete(row.id)}
+              className="rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50"
+              aria-label="Delete result"
+            >
+              Delete
+            </button>
+          ) : null}
+        </div>
       </header>
 
       {isPending ? (

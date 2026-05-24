@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { InputForm } from "@/components/input-form";
 import { HistorySidebar } from "@/components/history-sidebar";
 import { ResultsTable, summarize } from "@/components/results-table";
-import { createBatch, fetchHistory } from "@/lib/api-client";
+import { createBatch, fetchHistory, deleteResult } from "@/lib/api-client";
 import { subscribeToBatch } from "@/lib/sse-client";
 import type { BatchSummary, ResultRow } from "@/lib/types";
 
@@ -41,6 +41,15 @@ export default function Home() {
     });
   }
 
+  async function handleDelete(resultId: string) {
+    try {
+      await deleteResult(resultId);
+      setRows((prev) => prev.filter((r) => r.id !== resultId));
+    } catch (err) {
+      console.error("Failed to delete result:", err);
+    }
+  }
+
   const summary = summarize(rows);
   const completed = rows.length - summary.pending;
 
@@ -68,7 +77,7 @@ export default function Home() {
                 ? `${rows.length} of ${rows.length} scored — ${summary.hot} hot (8+), ${summary.warm} warm (5–7), ${summary.cool} skip (1–4)`
                 : `Scoring… ${completed} of ${rows.length} done`}
             </p>
-            <ResultsTable rows={rows} briefgenUrl={BRIEFGEN_URL} sortByScore={allDone} />
+            <ResultsTable rows={rows} briefgenUrl={BRIEFGEN_URL} sortByScore={allDone} onDelete={handleDelete} />
           </div>
         ) : null}
       </main>

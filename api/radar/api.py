@@ -107,6 +107,17 @@ def build_app(
     async def health() -> dict:
         return {"ok": True}
 
+    @app.delete("/api/radar/result/{result_id}")
+    async def delete_result(
+        result_id: str,
+        partner_email: str = Depends(auth.require_partner_email),
+    ) -> dict:
+        repo = repo_factory()
+        deleted = repo.delete_result(result_id, partner_email)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="not found or not yours")
+        return {"ok": True}
+
     return app
 
 
