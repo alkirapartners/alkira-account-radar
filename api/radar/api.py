@@ -118,6 +118,17 @@ def build_app(
             raise HTTPException(status_code=404, detail="not found or not yours")
         return {"ok": True}
 
+    @app.delete("/api/radar/batch/{batch_id}")
+    async def delete_batch(
+        batch_id: str,
+        partner_email: str = Depends(auth.require_partner_email),
+    ) -> dict:
+        repo = repo_factory()
+        deleted = repo.delete_batch(batch_id, partner_email)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="not found or not yours")
+        return {"ok": True}
+
     return app
 
 

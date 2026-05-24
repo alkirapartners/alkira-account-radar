@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { InputForm } from "@/components/input-form";
 import { HistorySidebar } from "@/components/history-sidebar";
 import { ResultsTable, summarize } from "@/components/results-table";
-import { createBatch, fetchHistory, deleteResult } from "@/lib/api-client";
+import { createBatch, fetchHistory, deleteResult, deleteBatch } from "@/lib/api-client";
 import { subscribeToBatch } from "@/lib/sse-client";
 import type { BatchSummary, ResultRow } from "@/lib/types";
 
@@ -44,7 +44,14 @@ export default function Home() {
   async function handleDelete(resultId: string) {
     try {
       await deleteResult(resultId);
-      setRows((prev) => prev.filter((r) => r.id !== resultId));
+      const next = rows.filter((r) => r.id !== resultId);
+      setRows(next);
+      if (next.length === 0 && currentBatchId) {
+        await deleteBatch(currentBatchId).catch(console.error);
+        setCurrentBatchId(null);
+        setAllDone(false);
+        fetchHistory().then(setHistory).catch(console.error);
+      }
     } catch (err) {
       console.error("Failed to delete result:", err);
     }

@@ -114,3 +114,14 @@ class RadarRepo:
             return False
         self.c.table("radar_results").delete().eq("id", result_id).execute()
         return True
+
+    def delete_batch(self, batch_id: str, partner_email: str) -> bool:
+        """Delete a batch and all its results after verifying ownership."""
+        batch = self.get_batch(batch_id, partner_email)
+        if not batch:
+            return False
+        if batch.get("partner_email", "").lower() != partner_email.lower():
+            return False
+        self.c.table("radar_results").delete().eq("batch_id", batch_id).execute()
+        self.c.table("radar_batches").delete().eq("id", batch_id).execute()
+        return True

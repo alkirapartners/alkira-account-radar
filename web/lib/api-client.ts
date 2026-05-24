@@ -34,3 +34,11 @@ export async function deleteResult(resultId: string): Promise<void> {
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
 }
+
+export async function deleteBatch(batchId: string): Promise<void> {
+  const res = await fetch(`${BASE}/batch/${encodeURIComponent(batchId)}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+}
