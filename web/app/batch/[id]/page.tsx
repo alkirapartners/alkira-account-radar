@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { ResultsTable, summarize } from "@/components/results-table";
+import { summarize } from "@/components/results-table";
+import { BatchView } from "./batch-view";
 import type { Batch } from "@/lib/types";
 
 const API_INTERNAL = process.env.RADAR_API_INTERNAL ?? "http://127.0.0.1:8601";
@@ -28,7 +29,7 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 p-8">
-      <Link href="/" className="text-sm text-accent hover:underline">← Back to new batch</Link>
+      <Link href="/radar/" className="text-sm text-accent hover:underline">← Back to new batch</Link>
       <header>
         <h1 className="text-2xl font-bold">Batch {batch.id.slice(0, 8)}</h1>
         <p className="text-sm text-ink/60">
@@ -39,7 +40,7 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
           {summary.error > 0 ? `, ${summary.error} errored` : ""}
         </p>
       </header>
-      <ResultsTable rows={batch.results} briefgenUrl={BRIEFGEN_URL} sortByScore />
+      <BatchView batch={batch} briefgenUrl={BRIEFGEN_URL} />
     </main>
   );
 }
