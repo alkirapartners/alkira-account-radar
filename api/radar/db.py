@@ -88,7 +88,8 @@ class RadarRepo:
                .eq("partner_email", partner_email)
                .order("created_at", desc=True).limit(limit).execute())
         for b in res.data:
-            b.pop("radar_results", None)
+            results = b.pop("radar_results", [])
+            b["remaining_count"] = len(results)
         return res.data
 
     def count_batches_today(self, partner_email: str) -> int:

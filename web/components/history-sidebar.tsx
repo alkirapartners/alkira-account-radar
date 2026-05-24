@@ -24,7 +24,7 @@ export function HistorySidebar({ batches, activeId }: Props) {
                   activeId === b.id ? "bg-ink/5 font-medium" : ""
                 }`}
               >
-                {b.unique_count} accounts
+                {b.remaining_count ?? b.unique_count} accounts
                 <span className="ml-2 text-ink/50">
                   {new Date(b.created_at).toLocaleDateString()}
                 </span>

@@ -50,8 +50,8 @@ export default function Home() {
         await deleteBatch(currentBatchId).catch(console.error);
         setCurrentBatchId(null);
         setAllDone(false);
-        fetchHistory().then(setHistory).catch(console.error);
       }
+      fetchHistory().then(setHistory).catch(console.error);
     } catch (err) {
       console.error("Failed to delete result:", err);
     }

@@ -29,6 +29,7 @@ export interface BatchSummary {
   id: string;
   status: BatchStatus;
   unique_count: number;
+  remaining_count?: number;
   created_at: string;
 }
 
