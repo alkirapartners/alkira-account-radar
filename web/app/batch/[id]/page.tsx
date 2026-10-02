@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { summarize } from "@/components/results-table";
+import { formatSummary, summarize } from "@/lib/row-state";
 import { BatchView } from "./batch-view";
 import type { Batch } from "@/lib/types";
 
@@ -35,10 +35,7 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
         <p className="text-sm text-ink/60">
           {batch.unique_count} accounts · {new Date(batch.created_at).toLocaleString()}
         </p>
-        <p className="mt-2 text-sm font-medium">
-          {summary.hot} hot (8+), {summary.warm} warm (5–7), {summary.cool} skip (1–4)
-          {summary.error > 0 ? `, ${summary.error} errored` : ""}
-        </p>
+        <p className="mt-2 text-sm font-medium">{formatSummary(summary)}</p>
       </header>
       <BatchView batch={batch} briefgenUrl={BRIEFGEN_URL} />
     </main>

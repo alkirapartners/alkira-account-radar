@@ -7,10 +7,7 @@ export interface ResultRow {
   resolved_name: string | null;
   resolved_domain: string | null;
   score: number | null;
-  fit_bullet: string | null;
-  objection_bullet: string | null;
-  action_bullet: string | null;
-  sources: string[];
+  reasons: string[];
   status: ResultStatus;
   error_message: string | null;
 }

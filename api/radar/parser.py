@@ -6,6 +6,8 @@ class ParseError(ValueError):
 
 
 _DELIMITERS = re.compile(r"[,\n\r\t]+")
+# Each name goes straight into a model prompt; nothing legitimate is longer.
+MAX_NAME_LENGTH = 100
 
 
 def parse_accounts(raw: str, max_size: int = 40) -> tuple[list[str], int]:
@@ -15,7 +17,7 @@ def parse_accounts(raw: str, max_size: int = 40) -> tuple[list[str], int]:
     dedupes case-insensitively while preserving the first-seen casing.
 
     Returns (accounts, unique_count). Raises ParseError if the result is
-    empty or exceeds max_size.
+    empty, exceeds max_size, or contains a name over MAX_NAME_LENGTH.
     """
     candidates = (s.strip() for s in _DELIMITERS.split(raw))
     candidates = (s for s in candidates if s)
@@ -31,6 +33,11 @@ def parse_accounts(raw: str, max_size: int = 40) -> tuple[list[str], int]:
 
     if not accounts:
         raise ParseError("Add at least one account name.")
+
+    if any(len(name) > MAX_NAME_LENGTH for name in accounts):
+        raise ParseError(
+            f"Each account name must be {MAX_NAME_LENGTH} characters or fewer."
+        )
 
     if len(accounts) > max_size:
         raise ParseError(
