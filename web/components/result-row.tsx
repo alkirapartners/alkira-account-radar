@@ -1,4 +1,5 @@
 import { ScoreBadge } from "./score-badge";
+import { briefUrl, rowState } from "@/lib/row-state";
 import type { ResultRow as Row } from "@/lib/types";
 
 interface Props {
@@ -8,17 +9,10 @@ interface Props {
 }
 
 export function ResultRow({ row, briefgenUrl, onDelete }: Props) {
-  const isPending = row.status === "pending";
-  const isError = row.status === "error";
-
-  const handoff = (() => {
-    if (!row.resolved_name) return null;
-    const params = new URLSearchParams({
-      company: row.resolved_name,
-      ...(row.resolved_domain ? { domain: row.resolved_domain } : {}),
-    });
-    return `${briefgenUrl}/?${params.toString()}`;
-  })();
+  const state = rowState(row);
+  const handoff = briefUrl(row, briefgenUrl);
+  // A row still streaming in has no reasons field yet.
+  const reasons = row.reasons ?? [];
 
   return (
     <article className="rounded-xl border border-ink/10 bg-white p-4 shadow-sm">
@@ -43,7 +37,7 @@ export function ResultRow({ row, briefgenUrl, onDelete }: Props) {
               Generate brief →
             </a>
           ) : null}
-          {onDelete && !isPending ? (
+          {onDelete && state !== "pending" ? (
             <button
               onClick={() => onDelete(row.id)}
               className="rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50"
@@ -55,29 +49,25 @@ export function ResultRow({ row, briefgenUrl, onDelete }: Props) {
         </div>
       </header>
 
-      {isPending ? (
+      {state === "pending" ? (
         <p className="mt-3 text-sm italic text-ink/60" role="status">
-          Researching…
+          Scoring…
         </p>
-      ) : isError ? (
+      ) : state === "error" ? (
         <p className="mt-3 text-sm text-red-600" role="alert">
           {row.error_message ?? "Failed to score this account."}
         </p>
+      ) : state === "unscored" ? (
+        <p className="mt-3 text-sm text-ink/70">
+          Not enough is known about this account for a quick score. Generate a brief to
+          research it.
+        </p>
       ) : (
-        <dl className="mt-3 grid gap-2 text-sm">
-          <div className="flex gap-2">
-            <dt className="shrink-0 font-medium text-green-700">Fit:</dt>
-            <dd>{row.fit_bullet}</dd>
-          </div>
-          <div className="flex gap-2">
-            <dt className="shrink-0 font-medium text-amber-700">Objection:</dt>
-            <dd>{row.objection_bullet}</dd>
-          </div>
-          <div className="flex gap-2">
-            <dt className="shrink-0 font-medium text-accent">Action:</dt>
-            <dd>{row.action_bullet}</dd>
-          </div>
-        </dl>
+        <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm marker:text-accent">
+          {reasons.map((reason, i) => (
+            <li key={i}>{reason}</li>
+          ))}
+        </ul>
       )}
     </article>
   );

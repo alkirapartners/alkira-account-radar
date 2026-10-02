@@ -5,15 +5,17 @@
 - Python 3.11+
 - Node 22+
 - Access to the shared Supabase project used by brief-gen
-- Anthropic API key with Managed Agents beta access
-- Skill IDs from brief-gen: `ALKIRA_CUSTOMER_SKILL_ID`, `STOP_SLOP_SKILL_ID`
+- Anthropic API key
+
+Scoring is one direct Claude call per account. There is no agent, no session
+and no web search: the model scores from what it already knows, guided by the
+rubric and Alkira knowledge base in `api/radar/reference/`.
 
 ## First-time setup
 
 ```bash
 cp .env.example .env
-# Fill in ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
-# ALKIRA_CUSTOMER_SKILL_ID, STOP_SLOP_SKILL_ID
+# Fill in ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 ```
 
 ### Apply the database migration
@@ -22,16 +24,23 @@ cp .env.example .env
 supabase db push --file supabase/migrations/20260518_radar_tables.sql
 ```
 
-### Upload the rubric skill and create the agent
+### Install backend deps
 
 ```bash
 cd api
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python -m radar.setup_skills    # populates ALKIRA_RADAR_RUBRIC_SKILL_ID
-python -m radar.setup_agent     # populates ALKIRA_RADAR_AGENT_ID + ALKIRA_RADAR_ENV_ID
 ```
+
+### Changing how accounts are scored
+
+Edit the files under `api/radar/reference/` and restart the API. They are read
+at startup and inlined into the cached system prompt.
+
+- `scoring-rubric.md`: the 1-10 bands and what raises or lowers a score.
+- `alkira-customer.md`: a copy of `skills/alkira-customer/SKILL.md` from
+  CLEAR-brief-gen. Re-copy it when the knowledge base changes there.
 
 ### Install frontend deps
 
@@ -105,6 +114,7 @@ Extend brief-gen's existing deploy hook to also pull and restart radar:
 
 ```bash
 cd /opt/radar && git pull --ff-only
+api/.venv/bin/pip install -r api/requirements.txt
 sudo systemctl restart radar-api radar-web
 # OR with docker compose:
 cd /opt/radar && git pull --ff-only && sudo docker compose up -d --build

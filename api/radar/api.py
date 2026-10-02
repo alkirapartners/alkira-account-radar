@@ -6,10 +6,10 @@ from anthropic import AsyncAnthropic
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from radar import auth, db
-from radar.agent_client import make_client_from_env
 from radar.orchestrator import RadarOrchestrator
 from radar.parser import ParseError, parse_accounts
 from radar.schemas import BatchCreateRequest, BatchResponse, ResultRow
+from radar.scorer import REQUEST_TIMEOUT_SECONDS, AccountScorer
 from radar.sse import bus
 
 RepoFactory = Callable[[], db.RadarRepo]
@@ -21,9 +21,9 @@ def _default_repo() -> db.RadarRepo:
 
 
 def _default_orchestrator(repo: db.RadarRepo) -> RadarOrchestrator:
-    agent = make_client_from_env(AsyncAnthropic())
+    scorer = AccountScorer(AsyncAnthropic(timeout=REQUEST_TIMEOUT_SECONDS))
     return RadarOrchestrator(
-        agent=agent, repo=repo, bus=bus,
+        scorer=scorer, repo=repo, bus=bus,
         concurrency=int(os.environ.get("RADAR_AGENT_CONCURRENCY", "8")),
     )
 

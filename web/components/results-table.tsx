@@ -20,17 +20,3 @@ export function ResultsTable({ rows, briefgenUrl, sortByScore = false, onDelete 
     </section>
   );
 }
-
-export function summarize(rows: Row[]): {
-  hot: number; warm: number; cool: number; pending: number; error: number;
-} {
-  let hot = 0, warm = 0, cool = 0, pending = 0, error = 0;
-  for (const r of rows) {
-    if (r.status === "pending") pending++;
-    else if (r.status === "error") error++;
-    else if ((r.score ?? 0) >= 8) hot++;
-    else if ((r.score ?? 0) >= 5) warm++;
-    else cool++;
-  }
-  return { hot, warm, cool, pending, error };
-}

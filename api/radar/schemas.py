@@ -1,31 +1,35 @@
 from __future__ import annotations
 import json
 from typing import Literal, Optional
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 
-class AgentOutput(BaseModel):
+REASON_COUNT = 3
+
+
+class ScoreOutput(BaseModel):
+    """One account's score as returned by the model.
+
+    A company the model does not recognize carries no score and no reasons.
+    """
+
+    recognized: bool
     resolved_name: Optional[str] = None
     resolved_domain: Optional[str] = None
     score: Optional[int] = Field(default=None, ge=1, le=10)
-    fit_bullet: Optional[str] = None
-    objection_bullet: Optional[str] = None
-    action_bullet: Optional[str] = None
-    sources: list[str] = Field(default_factory=list)
-    status: Literal["ok", "not_found"] = "ok"
-    error_message: Optional[str] = None
+    reasons: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
-    def _check_consistency(self) -> "AgentOutput":
-        if self.status == "ok":
-            missing = [
-                f for f in ("fit_bullet", "objection_bullet", "action_bullet", "score")
-                if getattr(self, f) in (None, "")
-            ]
-            if missing:
-                raise ValueError(
-                    f"AgentOutput with status=ok missing required fields: {missing}"
-                )
+    def _check_consistency(self) -> "ScoreOutput":
+        if not self.recognized:
+            return self
+        if self.score is None:
+            raise ValueError("A recognized company must have a score.")
+        if len(self.reasons) != REASON_COUNT or not all(r.strip() for r in self.reasons):
+            raise ValueError(
+                f"A recognized company must have exactly {REASON_COUNT} non-empty reasons "
+                f"(got {len(self.reasons)})."
+            )
         return self
 
 
@@ -39,17 +43,9 @@ class ResultRow(BaseModel):
     resolved_name: Optional[str] = None
     resolved_domain: Optional[str] = None
     score: Optional[int] = None
-    fit_bullet: Optional[str] = None
-    objection_bullet: Optional[str] = None
-    action_bullet: Optional[str] = None
-    sources: list[str] = Field(default_factory=list)
+    reasons: list[str] = Field(default_factory=list)
     status: Literal["pending", "done", "error"] = "pending"
     error_message: Optional[str] = None
-
-    @field_validator("sources", mode="before")
-    @classmethod
-    def _coerce_null_sources(cls, v):
-        return v if v is not None else []
 
 
 class BatchResponse(BaseModel):

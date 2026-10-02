@@ -4,9 +4,9 @@ Partner-facing tool that scores up to 40 accounts at a time for Alkira fit. Sibl
 
 ## Layout
 
-- `api/` — FastAPI backend + Claude Managed Agent orchestration
+- `api/` — FastAPI backend; scores each account with one direct Claude call
+- `api/radar/reference/` — Scoring rubric and Alkira knowledge base inlined into the prompt
 - `web/` — Next.js frontend
-- `skills/` — Source for the `alkira-radar-rubric` Claude skill
 - `supabase/` — Database migrations
 - `deploy/` — nginx + systemd configs
 - `docs/` — Design specs and implementation plans

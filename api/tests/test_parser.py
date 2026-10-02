@@ -55,6 +55,16 @@ def test_max_size_enforced():
         parse_accounts(raw, max_size=40)
 
 
+def test_overlong_account_name_raises():
+    with pytest.raises(ParseError, match="100 characters or fewer"):
+        parse_accounts("Acme\n" + "x" * 101)
+
+
+def test_account_name_at_the_length_limit_is_accepted():
+    parsed, _ = parse_accounts("x" * 100)
+    assert parsed == ["x" * 100]
+
+
 def test_max_size_after_dedupe_allows_40_unique():
     lines = [f"Co{i}" for i in range(40)] + ["Co0"]
     parsed, unique = parse_accounts("\n".join(lines), max_size=40)

@@ -1,56 +1,59 @@
 import pytest
 from pydantic import ValidationError
-from radar.schemas import AgentOutput, BatchCreateRequest, SSEEvent
+from radar.schemas import BatchCreateRequest, ResultRow, ScoreOutput, SSEEvent
 
 
-def test_agent_output_happy_path():
-    out = AgentOutput.model_validate({
+def _scored(**overrides) -> dict:
+    return {
+        "recognized": True,
         "resolved_name": "Acme Corp",
         "resolved_domain": "acme.com",
         "score": 8,
-        "fit_bullet": "Strong multicloud signal.",
-        "objection_bullet": "Recent Aviatrix contract.",
-        "action_bullet": "Lead with EMEA backbone angle.",
-        "sources": ["https://acme.com/press"],
-    })
+        "reasons": ["Multicloud footprint.", "Frequent acquisitions.", "Hundreds of sites."],
+        **overrides,
+    }
+
+
+def test_score_output_happy_path():
+    out = ScoreOutput.model_validate(_scored())
+
     assert out.score == 8
-    assert out.status == "ok"
+    assert len(out.reasons) == 3
 
 
-def test_agent_output_not_found():
-    out = AgentOutput.model_validate({
-        "resolved_name": None,
-        "resolved_domain": None,
-        "score": None,
-        "status": "not_found",
-        "error_message": "No public information found.",
-        "sources": [],
-    })
-    assert out.status == "not_found"
+def test_score_output_unrecognized_needs_no_score_or_reasons():
+    out = ScoreOutput.model_validate({"recognized": False})
+
     assert out.score is None
+    assert out.reasons == []
 
 
-def test_agent_output_score_out_of_range():
+def test_score_output_rejects_score_out_of_range():
     with pytest.raises(ValidationError):
-        AgentOutput.model_validate({
-            "resolved_name": "Acme",
-            "resolved_domain": "acme.com",
-            "score": 11,
-            "fit_bullet": "x",
-            "objection_bullet": "x",
-            "action_bullet": "x",
-            "sources": [],
-        })
+        ScoreOutput.model_validate(_scored(score=11))
 
 
-def test_agent_output_ok_requires_bullets():
+def test_score_output_recognized_requires_a_score():
     with pytest.raises(ValidationError):
-        AgentOutput.model_validate({
-            "resolved_name": "Acme",
-            "resolved_domain": "acme.com",
-            "score": 8,
-            "sources": [],
-        })
+        ScoreOutput.model_validate(_scored(score=None))
+
+
+@pytest.mark.parametrize("reasons", [[], ["one", "two"], ["one", "two", "three", "four"]])
+def test_score_output_recognized_requires_exactly_three_reasons(reasons):
+    with pytest.raises(ValidationError):
+        ScoreOutput.model_validate(_scored(reasons=reasons))
+
+
+def test_score_output_rejects_blank_reasons():
+    with pytest.raises(ValidationError):
+        ScoreOutput.model_validate(_scored(reasons=["one", "  ", "three"]))
+
+
+def test_result_row_defaults_to_no_reasons():
+    row = ResultRow(id="r1", account_name="Acme")
+
+    assert row.reasons == []
+    assert row.status == "pending"
 
 
 def test_batch_create_request():

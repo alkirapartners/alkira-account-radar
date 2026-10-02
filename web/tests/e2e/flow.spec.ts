@@ -11,7 +11,7 @@ test.describe("radar flow", () => {
     await page.getByRole("button", { name: /score accounts/i }).click();
 
     await expect(page.getByRole("status").first()).toBeVisible({ timeout: 5_000 });
-    await expect(page.getByText(/of 3 done|3 of 3 scored/i)).toBeVisible({ timeout: 120_000 });
+    await expect(page.getByText(/of 3 scored/i)).toBeVisible({ timeout: 120_000 });
 
     const briefBtn = page.getByRole("link", { name: /generate brief/i }).first();
     await expect(briefBtn).toBeVisible();

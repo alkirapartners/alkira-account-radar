@@ -13,6 +13,23 @@ def make_client() -> Client:
     )
 
 
+# radar_results predates the three-reasons format: its bullet columns are named
+# for the old fit/objection/action labels. Reasons are stored in them in order
+# so the format change needs no migration. Nothing outside this module sees
+# the column names.
+_REASON_COLUMNS = ("fit_bullet", "objection_bullet", "action_bullet")
+
+
+def _reasons_to_columns(reasons: list[str]) -> dict[str, Optional[str]]:
+    padded = [*reasons, *([None] * len(_REASON_COLUMNS))]
+    return dict(zip(_REASON_COLUMNS, padded))
+
+
+def _with_reasons(row: dict) -> dict:
+    rest = {k: v for k, v in row.items() if k not in _REASON_COLUMNS}
+    return {**rest, "reasons": [row[c] for c in _REASON_COLUMNS if row.get(c)]}
+
+
 class RadarRepo:
     """All Supabase queries for the radar tool. One method per use case."""
 
@@ -42,19 +59,14 @@ class RadarRepo:
 
     def update_result_done(self, result_id: str, resolved_name: Optional[str],
                            resolved_domain: Optional[str], score: Optional[int],
-                           fit_bullet: Optional[str], objection_bullet: Optional[str],
-                           action_bullet: Optional[str], sources: list[str],
-                           agent_run_id: Optional[str]) -> None:
+                           reasons: list[str], run_id: Optional[str]) -> None:
         self.c.table("radar_results").update({
             "status": "done",
             "resolved_name": resolved_name,
             "resolved_domain": resolved_domain,
             "score": score,
-            "fit_bullet": fit_bullet,
-            "objection_bullet": objection_bullet,
-            "action_bullet": action_bullet,
-            "sources": sources,
-            "agent_run_id": agent_run_id,
+            **_reasons_to_columns(reasons),
+            "agent_run_id": run_id,
             "completed_at": datetime.now(timezone.utc).isoformat(),
         }).eq("id", result_id).execute()
 
@@ -79,7 +91,7 @@ class RadarRepo:
     def get_results(self, batch_id: str, partner_email: str) -> list[dict]:
         self._set_partner_jwt(partner_email)
         res = self.c.table("radar_results").select("*").eq("batch_id", batch_id).execute()
-        return res.data
+        return [_with_reasons(row) for row in res.data]
 
     def list_batches(self, partner_email: str, limit: int = 50) -> list[dict]:
         self._set_partner_jwt(partner_email)
