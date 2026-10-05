@@ -36,8 +36,8 @@ export function LibraryRow({ brief }: LibraryRowProps) {
         <span className="flex items-center gap-3 sm:justify-end">
           <ScoreMeter score={brief.score} scale={FIT_SCALE} size="md" />
           <span className="num w-7 text-right text-sm font-medium text-ink" aria-hidden="true">
-            {brief.score > 0 ? brief.score : <span className="text-ink-3">&ndash;</span>}
-            {brief.score > 0 ? <span className="text-ink-3">/{FIT_SCALE}</span> : null}
+            {brief.score > 0 ? brief.score : <span className="text-ink-2">&ndash;</span>}
+            {brief.score > 0 ? <span className="text-ink-2">/{FIT_SCALE}</span> : null}
           </span>
         </span>
 

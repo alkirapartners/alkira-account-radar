@@ -48,7 +48,9 @@ export function CountUp({ value, decimals = 0, durationMs = DEFAULT_DURATION_MS,
   }, [value, durationMs, delayMs, reducedMotion]);
 
   return (
-    <span className={cn("tabular-nums", className)} aria-label={value.toFixed(decimals)}>
+    <span className={cn("tabular-nums", className)}>
+      {/* Screen readers get the final value once, not every frame of the count. */}
+      <span className="sr-only">{value.toFixed(decimals)}</span>
       <span aria-hidden="true">{shown.toFixed(decimals)}</span>
     </span>
   );

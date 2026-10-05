@@ -48,7 +48,7 @@ export function ResultRow({ row, onDelete }: ResultRowProps) {
           ) : (
             <>
               <p className="text-[44px] font-semibold tabular-nums leading-none tracking-display" aria-hidden="true">
-                {row.score ?? <span className="text-ink-3">&ndash;</span>}
+                {row.score ?? <span className="text-ink-2">&ndash;</span>}
               </p>
               {/* Keyed on the score so the ticks fill when the result lands. */}
               <ScoreMeter key={String(row.score)} score={row.score} scale={SCORE_SCALE} size="sm" animate className="sm:mt-3" />

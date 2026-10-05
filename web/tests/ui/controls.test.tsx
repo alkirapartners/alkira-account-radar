@@ -122,15 +122,18 @@ describe("ScoreMeter", () => {
 });
 
 describe("CountUp", () => {
-  it("exposes the final value to assistive technology from the first render", () => {
-    render(<TestProviders><CountUp value={3.7} decimals={1} /></TestProviders>);
-    expect(screen.getByLabelText("3.7")).toBeInTheDocument();
+  it("gives assistive technology the final value once, and hides the animated digits from it", () => {
+    const { container } = render(<TestProviders><CountUp value={3.7} decimals={1} /></TestProviders>);
+
+    expect(container.querySelector(".sr-only")).toHaveTextContent("3.7");
+    expect(container.querySelector("[aria-hidden='true']")).not.toBeNull();
+    expect(container.querySelector("[aria-label]")).toBeNull();
   });
 
   it("shows the final value straight away under reduced motion", () => {
     // TestProviders forces reduced motion.
     const { container } = render(<TestProviders><CountUp value={42} /></TestProviders>);
-    expect(container.textContent).toBe("42");
+    expect(container.querySelector("[aria-hidden='true']")).toHaveTextContent("42");
   });
 });
 

@@ -33,7 +33,7 @@ export function ScoreTile({ label, score, rationale }: ScoreTileProps) {
         <div>
           <p className="flex items-baseline gap-2 font-semibold leading-none tracking-display">
             {tier === "none" ? (
-              <span className="text-[72px] text-ink-3 sm:text-[88px]">&ndash;</span>
+              <span className="text-[72px] text-ink-2 sm:text-[88px]">&ndash;</span>
             ) : (
               <CountUp value={score} durationMs={900} delayMs={COUNT_DELAY_MS} className="text-[72px] sm:text-[88px]" />
             )}

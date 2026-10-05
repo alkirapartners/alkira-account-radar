@@ -40,7 +40,7 @@ export function StatsRow({ briefs }: StatsRowProps) {
       </Stat>
       <Stat label="Average fit">
         {average == null ? (
-          <span className="text-ink-3">&ndash;</span>
+          <span className="text-ink-2">&ndash;</span>
         ) : (
           <>
             <CountUp value={average} decimals={1} delayMs={COUNT_STAGGER_MS} />
