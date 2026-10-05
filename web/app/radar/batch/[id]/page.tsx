@@ -1,11 +1,19 @@
-import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { formatSummary, summarize } from "@/lib/row-state";
-import { BatchView } from "./batch-view";
+
+import { SummaryPills } from "@/components/radar/summary-pills";
+import { exactTime, relativeTime } from "@/lib/relative-time";
+import { summarize } from "@/lib/row-state";
 import type { Batch } from "@/lib/types";
 
+import { BatchView } from "./batch-view";
+
 const API_INTERNAL = process.env.RADAR_API_INTERNAL ?? "http://127.0.0.1:8601";
+
+export const metadata: Metadata = { title: "Radar batch" };
 
 async function loadBatch(id: string, authEmail: string | null): Promise<Batch | null> {
   const res = await fetch(`${API_INTERNAL}/api/radar/batch/${encodeURIComponent(id)}`, {
@@ -19,24 +27,38 @@ async function loadBatch(id: string, authEmail: string | null): Promise<Batch | 
 
 export default async function BatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const h = await headers();
-  const authEmail = h.get("x-auth-email");
-  const batch = await loadBatch(id, authEmail);
+  const requestHeaders = await headers();
+  const batch = await loadBatch(id, requestHeaders.get("x-auth-email"));
   if (!batch) notFound();
 
-  const summary = summarize(batch.results);
+  const count = batch.results.length;
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6 p-8">
-      <Link href="/radar" className="text-sm text-accent hover:underline">← Back to new batch</Link>
-      <header>
-        <h1 className="text-2xl font-bold">Batch {batch.id.slice(0, 8)}</h1>
-        <p className="text-sm text-ink/60">
-          {batch.unique_count} accounts · {new Date(batch.created_at).toLocaleString()}
-        </p>
-        <p className="mt-2 text-sm font-medium">{formatSummary(summary)}</p>
+    <div className="page pb-20 pt-4 sm:pt-6">
+      <Link
+        href="/radar"
+        className="group inline-flex h-9 items-center gap-1.5 rounded-full pr-3 text-sm font-medium text-ink-2 transition-colors duration-fast hover:text-ink"
+      >
+        <ArrowLeft className="h-4 w-4 transition-transform duration-fast ease-out group-hover:-translate-x-0.5" aria-hidden="true" />
+        Account Radar
+      </Link>
+      <header className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-[clamp(2rem,1.2rem+3vw,3.25rem)] font-semibold leading-[1.05] tracking-display">
+            <span className="num">{count}</span> {count === 1 ? "account" : "accounts"}
+          </h1>
+          <p className="mt-3 text-sm text-ink-2">
+            Scored{" "}
+            <time dateTime={batch.created_at} title={exactTime(batch.created_at)}>
+              {relativeTime(batch.created_at)}
+            </time>
+          </p>
+        </div>
+        <SummaryPills summary={summarize(batch.results)} />
       </header>
-      <BatchView batch={batch} />
-    </main>
+      <div className="mt-8">
+        <BatchView batch={batch} />
+      </div>
+    </div>
   );
 }

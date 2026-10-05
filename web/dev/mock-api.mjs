@@ -48,7 +48,7 @@ async function readJson(req) {
 function openStream(res) {
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
-    "Cache-Control": "no-cache",
+    "Cache-Control": "no-cache, no-transform",
     "X-Accel-Buffering": "no",
   });
   const heartbeat = setInterval(() => res.write(": ping\n\n"), HEARTBEAT_MS);
