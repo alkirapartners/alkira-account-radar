@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducedMotion } from "motion/react";
+import { useReducedMotionConfig } from "motion/react";
 import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/cn";
@@ -25,7 +25,8 @@ const easeOutExpo = (progress: number) => (progress >= 1 ? 1 : 1 - 2 ** (-10 * p
  * shows the final value straight away.
  */
 export function CountUp({ value, decimals = 0, durationMs = DEFAULT_DURATION_MS, delayMs = 0, className }: CountUpProps) {
-  const reducedMotion = useReducedMotion();
+  // Follows <MotionConfig>, which follows the viewer's system setting.
+  const reducedMotion = useReducedMotionConfig();
   const [shown, setShown] = useState(reducedMotion ? value : 0);
 
   useEffect(() => {
