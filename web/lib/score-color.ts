@@ -1,3 +1,5 @@
+import type { PillTone } from "@/components/ui/pill";
+
 export type ScoreBand = "hot" | "warm" | "cool" | "unknown";
 
 export function scoreBand(score: number | null): ScoreBand {
@@ -7,13 +9,18 @@ export function scoreBand(score: number | null): ScoreBand {
   return "cool";
 }
 
-const COLORS: Record<ScoreBand, string> = {
-  hot: "oklch(62% 0.20 25)",
-  warm: "oklch(78% 0.16 75)",
-  cool: "oklch(72% 0.06 240)",
-  unknown: "oklch(80% 0 0)",
+/** What each band is called on screen. A low score is a "skip", not a judgement of the company. */
+export const BAND_LABEL: Record<ScoreBand, string> = {
+  hot: "Hot",
+  warm: "Warm",
+  cool: "Skip",
+  unknown: "Not scored",
 };
 
-export function scoreColor(score: number | null): string {
-  return COLORS[scoreBand(score)];
-}
+/** The pill tone for each band, drawn from the design tokens. */
+export const BAND_TONE: Record<ScoreBand, PillTone> = {
+  hot: "accent",
+  warm: "warning",
+  cool: "neutral",
+  unknown: "neutral",
+};

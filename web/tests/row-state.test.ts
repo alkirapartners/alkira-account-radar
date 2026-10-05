@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { briefUrl, formatSummary, rowState, summarize } from "@/lib/row-state";
+import { briefHref, formatSummary, rowState, summarize } from "@/lib/row-state";
 import type { ResultRow } from "@/lib/types";
 
 function row(overrides: Partial<ResultRow>): ResultRow {
@@ -73,21 +73,20 @@ describe("formatSummary", () => {
   });
 });
 
-describe("briefUrl", () => {
-  it("hands the resolved company and domain to brief-gen", () => {
-    const url = briefUrl(
+describe("briefHref", () => {
+  it("links a scored row to the brief generator on the same site", () => {
+    const href = briefHref(
       row({ score: 8, resolved_name: "Acme Corporation", resolved_domain: "acme.com" }),
-      "https://briefgen.example",
     );
 
-    expect(url).toBe("https://briefgen.example/?company=Acme+Corporation&domain=acme.com");
+    expect(href).toBe("/?company=Acme+Corporation&domain=acme.com");
   });
 
   it("falls back to the typed name for an unscored account", () => {
-    expect(briefUrl(row({ account_name: "Zzyx Holdings" }), "")).toBe("/?company=Zzyx+Holdings");
+    expect(briefHref(row({ account_name: "Zzyx Holdings" }))).toBe("/?company=Zzyx+Holdings");
   });
 
   it.each(["pending", "error"] as const)("offers no brief link for a %s row", (status) => {
-    expect(briefUrl(row({ status }), "")).toBeNull();
+    expect(briefHref(row({ status }))).toBeNull();
   });
 });
