@@ -111,6 +111,13 @@ test.describe("the library", () => {
   });
 });
 
+test("an address left over from the old sign-in page is tidied, and names nobody", async ({ page }) => {
+  await page.goto("/?auth_email=someone%40example.com&q=north");
+
+  await expect(page).toHaveURL("/?q=north");
+  await expect(page.getByLabel("Search your briefs")).toHaveValue("north");
+});
+
 test.describe("a brief's page", () => {
   test("downloads the PDF from the API", async ({ page, request }) => {
     await page.goto(`/briefs/${RICH_BRIEF}`);

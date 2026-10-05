@@ -21,6 +21,11 @@ import { useGeneration, type GenerationResult } from "./use-generation";
 const OPEN_BRIEF_DELAY_MS = 550;
 /** Account Radar's "Generate brief" link arrives as /?company=<name>&domain=<domain>. */
 const PREFILL_PARAMS = ["company", "domain"];
+/**
+ * Read once, then removed from the address. auth_email is what the old
+ * sign-in page appended; nothing reads it now, so it is only tidied away.
+ */
+const CONSUMED_PARAMS = [...PREFILL_PARAMS, "auth_email"];
 
 export function briefHref(result: GenerationResult): string {
   const base = `/briefs/${result.briefId}`;
@@ -37,7 +42,7 @@ export function BriefHome() {
 
   // The prefill is read once, then its params are removed so a refresh does not refill the field.
   const [prefill] = useState(() => cleanCompany(params.get("company")));
-  const hasPrefillParams = PREFILL_PARAMS.some((name) => params.has(name));
+  const hasConsumedParams = CONSUMED_PARAMS.some((name) => params.has(name));
 
   const replaceParams = useCallback(
     (change: (next: URLSearchParams) => void) => {
@@ -50,8 +55,8 @@ export function BriefHome() {
   );
 
   useEffect(() => {
-    if (hasPrefillParams) replaceParams((next) => PREFILL_PARAMS.forEach((name) => next.delete(name)));
-  }, [hasPrefillParams, replaceParams]);
+    if (hasConsumedParams) replaceParams((next) => CONSUMED_PARAMS.forEach((name) => next.delete(name)));
+  }, [hasConsumedParams, replaceParams]);
 
   const onDone = useCallback(
     (result: GenerationResult) => {
