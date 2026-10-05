@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scoreBand, scoreColor } from "@/lib/score-color";
+import { BAND_LABEL, BAND_TONE, scoreBand } from "@/lib/score-color";
 
 describe("scoreBand", () => {
   it.each([
@@ -10,8 +10,19 @@ describe("scoreBand", () => {
   it("null is unknown", () => expect(scoreBand(null)).toBe("unknown"));
 });
 
-describe("scoreColor", () => {
-  it("returns a non-empty color for each band", () => {
-    [10, 7, 3, null].forEach((s) => expect(scoreColor(s as number | null)).toBeTruthy());
+describe("band presentation", () => {
+  it("names and tones every band", () => {
+    const bands = ["hot", "warm", "cool", "unknown"] as const;
+
+    bands.forEach((band) => {
+      expect(BAND_LABEL[band]).toBeTruthy();
+      expect(BAND_TONE[band]).toBeTruthy();
+    });
+  });
+
+  it("calls a low score a skip and gives only hot accounts the accent", () => {
+    expect(BAND_LABEL.cool).toBe("Skip");
+    expect(BAND_TONE.hot).toBe("accent");
+    expect(BAND_TONE.warm).not.toBe("accent");
   });
 });

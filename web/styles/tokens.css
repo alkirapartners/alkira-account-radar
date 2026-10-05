@@ -1,0 +1,56 @@
+/*
+ * Design tokens. Colours are stored as space-separated RGB channels so
+ * Tailwind can apply opacity (bg-ink/5, ring-accent/30). Light theme only;
+ * a dark theme would redefine this block under a data attribute.
+ */
+:root {
+  color-scheme: light;
+
+  /* Surfaces: warm canvas, white cards, one dark "ambient" surface */
+  --canvas-rgb: 245 245 243;
+  --surface-rgb: 255 255 255;
+  --sunken-rgb: 239 239 237;
+  --ambient-rgb: 13 13 14;
+  --ambient-raised-rgb: 26 26 30;
+
+  /* Text. ink-2 holds 4.5:1 on canvas and sunken; ink-3 is decorative only. */
+  --ink-rgb: 20 20 20;
+  --ink-2-rgb: 95 102 115;
+  --ink-3-rgb: 156 163 175;
+  --on-ambient-rgb: 244 244 245;
+  --on-ambient-2-rgb: 161 161 170;
+
+  /* The one accent: Alkira blue. accent-soft is its readable form on ambient. */
+  --accent-rgb: 45 88 242;
+  --accent-strong-rgb: 33 68 204;
+  --accent-soft-rgb: 124 155 255;
+
+  /* Semantic. The base values are text-safe; -fill is for marks, -tint for pills. */
+  --positive-rgb: 21 128 61;
+  --positive-tint-rgb: 220 252 231;
+  --warning-rgb: 180 83 9;
+  --warning-fill-rgb: 245 158 11;
+  --warning-tint-rgb: 254 243 199;
+  --negative-rgb: 190 18 60;
+  --negative-tint-rgb: 255 228 230;
+
+  /* Depth */
+  --shadow-card: 0 1px 2px rgb(20 20 20 / 0.04), 0 8px 24px rgb(20 20 20 / 0.04);
+  --shadow-lift: 0 2px 6px rgb(20 20 20 / 0.05), 0 18px 44px rgb(20 20 20 / 0.09);
+  --shadow-ambient: 0 24px 60px rgb(13 13 14 / 0.28);
+
+  /* Shape */
+  --radius-card: 20px;
+  --radius-inner: 12px;
+
+  /* Motion */
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+  --dur-slow: 400ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+
+  /* Layout */
+  --page-max: 1120px;
+  --bar-height: 64px;
+}
