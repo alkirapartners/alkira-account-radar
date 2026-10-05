@@ -59,13 +59,27 @@ uvicorn radar.api:app --host 127.0.0.1 --port 8601 --reload
 cd web && npm run dev
 ```
 
-Open http://localhost:3000. Locally, auth is bypassed — pass `X-Auth-Email: dev@example.com` via curl or browser extension to exercise endpoints.
+Open http://localhost:3000. Locally, auth is bypassed — pass `X-Auth-Email: dev@example.com` via curl or browser extension to exercise endpoints. The Brief Generator pages also need the Brief API from CLEAR-brief-gen on port 8501 (`uvicorn server:app --port 8501`).
+
+### Front end only, no keys or database
+
+`web/dev/mock-api.mjs` stands in for both APIs with sample data, including the brief generation stream:
+
+```bash
+cd web
+npm run mock       # terminal 1: mock APIs on port 8598
+npm run dev:mock   # terminal 2: the app on http://localhost:3100
+```
+
+Typing `fail`, `drop`, `busy`, `limit` or `reuse` as the company name exercises each way a generation can end.
 
 ## Production deploy
 
-Radar mounts under `/radar` on the same `briefgen.partners.alkira.cc` host
-as brief-gen. It piggybacks on brief-gen's nginx, TLS cert, and auth proxy.
-No separate subdomain or certbot run is needed.
+`web/` serves the whole `briefgen.partners.alkira.cc` site: the Brief Generator
+at `/` and the radar at `/radar`. It sits behind brief-gen's nginx, TLS cert and
+auth proxy, which pass the signed-in email in `X-Auth-Email`. No separate
+subdomain or certbot run is needed. The cutover from Streamlit is described in
+`docs/superpowers/specs/2026-10-05-shared-frontend-design.md`, section 7.
 
 ### On the shared EC2 host (first-time install)
 
@@ -125,5 +139,5 @@ cd /opt/radar && git pull --ff-only && sudo docker compose up -d --build
 ```bash
 cd api && pytest --cov=radar -v
 cd ../web && npm test
-npm run e2e  # requires running stack
+npm run e2e  # builds the app and runs it against the mock API; needs nothing else running
 ```
