@@ -53,6 +53,16 @@ describe("BriefBento", () => {
     expect(writeText).toHaveBeenCalledWith("How is the Azure-AWS connectivity going?");
   });
 
+  it("shows the notes that follow the questions as their own block, not under the last question", () => {
+    const startersMd = '1. "How many tools are you juggling?"\n   *(You\'re listening for: tool sprawl.)*\n\n**Validate early:**\n- Ask who owns the network budget.';
+    renderWithProviders(<BriefBento brief={{ ...RICH_BRIEF, startersMd }} />);
+
+    expect(screen.getByText("You're listening for: tool sprawl.")).toBeInTheDocument();
+    expect(screen.getByText("Validate early:").tagName).toBe("STRONG");
+    expect(screen.getByText("Ask who owns the network budget.").tagName).toBe("LI");
+    expect(document.body.textContent).not.toContain("**");
+  });
+
   it("drops the row label when an entry point is one undivided paragraph", () => {
     const merged = { heading: "Extranet as a service", signal: "One long paragraph covering everything.", solution: "", proof: "" };
     renderWithProviders(<BriefBento brief={{ ...RICH_BRIEF, entryPoints: [merged] }} />);

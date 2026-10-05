@@ -6,7 +6,7 @@ import { m } from "motion/react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button, buttonClasses } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -55,13 +55,25 @@ export function BriefScreen({ id }: BriefScreenProps) {
     if (brief.data) document.title = `Alkira | ${brief.data.company}`;
   }, [brief.data]);
 
+  // Set once this brief no longer exists on the server (updated or deleted).
+  const gone = useRef(false);
+  useEffect(
+    () => () => {
+      // Its cached copy is dropped only after this screen has left. Dropping it
+      // while the screen still shows would make the screen ask for it again,
+      // get a 404, and flash "not found" on the way out.
+      if (gone.current) queryClient.removeQueries({ queryKey: ["brief", id] });
+    },
+    [id, queryClient],
+  );
+
   const onUpdated = useCallback(
     (result: GenerationResult) => {
+      gone.current = true;
       void queryClient.invalidateQueries({ queryKey: BRIEFS_KEY });
-      queryClient.removeQueries({ queryKey: ["brief", id] });
       setTimeout(() => router.replace(`/briefs/${result.briefId}` as Route), OPEN_BRIEF_DELAY_MS);
     },
-    [id, queryClient, router],
+    [queryClient, router],
   );
   const update = useGeneration(onUpdated);
 
@@ -75,7 +87,10 @@ export function BriefScreen({ id }: BriefScreenProps) {
       router.push("/");
       return { previous };
     },
-    onSuccess: () => toast({ title: "Brief deleted" }),
+    onSuccess: () => {
+      gone.current = true;
+      toast({ title: "Brief deleted" });
+    },
     onError: (_error, _variables, context) => {
       if (context?.previous) queryClient.setQueryData(BRIEFS_KEY, context.previous);
       toast({ title: "The brief couldn't be deleted. It's back in your list.", tone: "error" });

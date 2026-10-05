@@ -165,11 +165,18 @@ test.describe("a brief's page", () => {
 
   test("updating replaces the brief with freshly researched one", async ({ page }) => {
     const oldId = await generateBrief(page, "Update Me Corp");
+    // The old brief is gone the moment the update lands. The page must move on
+    // without first asking for it again and flashing "not found".
+    const missing: string[] = [];
+    page.on("response", (response) => {
+      if (response.status() === 404) missing.push(new URL(response.url()).pathname);
+    });
 
     await page.getByRole("button", { name: /update brief/i }).first().click();
 
     await page.waitForURL((url) => /\/briefs\/[0-9a-f-]{36}/.test(url.pathname) && !url.pathname.endsWith(oldId));
     await expect(page.getByRole("heading", { level: 1, name: "Update Me Corp" })).toBeVisible();
+    expect(missing).toEqual([]);
     await page.goto(`/briefs/${oldId}`);
     await expect(page.getByText("This brief isn't here")).toBeVisible();
   });

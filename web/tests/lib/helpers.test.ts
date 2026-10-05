@@ -106,6 +106,7 @@ describe("parseStarters", () => {
         { text: "How's the Azure-AWS connectivity going?", hint: "" },
         { text: "What’s the timeline on zero trust?", hint: "" },
       ],
+      closing: [],
     });
   });
 
@@ -126,11 +127,33 @@ describe("parseStarters", () => {
         { text: "What happens when the WAN contract ends?", hint: "You're listening for: timeline pressure, manual work." },
         { text: "How are the acquisitions connected today?", hint: "Listening for: overlapping systems." },
       ],
+      closing: [],
+    });
+  });
+
+  it("keeps the notes after the last question apart from that question's listening note", () => {
+    const md = [
+      '1. "How many tools are you juggling?"',
+      "   *(You're listening for: tool sprawl.)*",
+      "",
+      "**Validate early:**",
+      "- Find out if they still pay for old MPLS lines.",
+      "- Ask who owns the network budget.",
+    ].join("\n");
+
+    expect(parseStarters(md)).toEqual({
+      notes: [],
+      questions: [{ text: "How many tools are you juggling?", hint: "You're listening for: tool sprawl." }],
+      closing: [
+        "**Validate early:**",
+        "- Find out if they still pay for old MPLS lines.",
+        "- Ask who owns the network budget.",
+      ],
     });
   });
 
   it("handles an empty section", () => {
-    expect(parseStarters("")).toEqual({ notes: [], questions: [] });
+    expect(parseStarters("")).toEqual({ notes: [], questions: [], closing: [] });
   });
 });
 

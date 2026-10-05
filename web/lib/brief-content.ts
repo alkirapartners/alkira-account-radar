@@ -17,29 +17,34 @@ export interface Starters {
   /** Lines before the first question (stakeholders, which question to lead with). Markdown. */
   notes: string[];
   questions: StarterQuestion[];
+  /** Lines after the questions that are not a listening note ("Validate early" and its bullets). Markdown. */
+  closing: string[];
 }
 
-/** "*(You're listening for: …)*" → "You're listening for: …" */
-const unwrapHint = (line: string) => line.replace(/^[*_]*\(?\s*/, "").replace(/\s*\)?[*_]*$/, "");
+// A listening note is a parenthesised aside, usually italic: *(You're listening for: …)*
+const HINT_LINE = /^[*_]*\((.+)\)[*_]*$/;
 
 export function parseStarters(md: string): Starters {
   const notes: string[] = [];
   const questions: StarterQuestion[] = [];
+  const closing: string[] = [];
   for (const line of md.split("\n")) {
     const text = line.trim();
     if (!text) continue;
     const numbered = NUMBERED_LINE.exec(text);
     const current = questions.at(-1);
+    const hint = HINT_LINE.exec(text);
     if (numbered) {
       questions.push({ text: numbered[1].replace(WRAPPING_QUOTES, ""), hint: "" });
-    } else if (current) {
-      // A line under a question belongs to it: the brief's "listening for" note.
-      current.hint = [current.hint, unwrapHint(text)].filter(Boolean).join(" ");
-    } else {
+    } else if (!current) {
       notes.push(text);
+    } else if (hint && closing.length === 0) {
+      current.hint = [current.hint, hint[1].trim()].filter(Boolean).join(" ");
+    } else {
+      closing.push(text);
     }
   }
-  return { notes, questions };
+  return { notes, questions, closing };
 }
 
 export interface Reference {

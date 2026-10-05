@@ -16,7 +16,7 @@ interface StartersTileProps {
 
 /** The questions to ask, on the dark surface, each one copyable. */
 export function StartersTile({ label, startersMd }: StartersTileProps) {
-  const { notes, questions } = parseStarters(startersMd);
+  const { notes, questions, closing } = parseStarters(startersMd);
 
   return (
     <m.section variants={rise} className="col-span-full">
@@ -51,6 +51,12 @@ export function StartersTile({ label, startersMd }: StartersTileProps) {
                 </li>
               ))}
             </ol>
+          ) : null}
+
+          {closing.length > 0 ? (
+            <Markdown className="mt-6 border-t border-white/10 pt-5 text-[15px] leading-relaxed text-on-ambient-2 [&_strong]:text-on-ambient">
+              {closing.join("\n")}
+            </Markdown>
           ) : null}
         </div>
       </AmbientPanel>
