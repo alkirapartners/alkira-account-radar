@@ -1,5 +1,6 @@
 import { screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
 
 import { BriefBento } from "@/components/brief/brief-bento";
 import { BriefHeader, formatReusedDate } from "@/components/brief/brief-header";
@@ -38,6 +39,35 @@ describe("BriefBento", () => {
     expect(screen.getByRole("button", { name: "Copy question 1" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Copy question 2" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Copy question 3" })).toBeNull();
+  });
+
+  it("shows a question's listening note beneath it, and copies only the question", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText } });
+    renderWithProviders(<BriefBento brief={RICH_BRIEF} />);
+
+    expect(screen.getByText("You're listening for: frustration with two clouds.")).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("*(");
+
+    await userEvent.click(screen.getByRole("button", { name: "Copy question 1" }));
+    expect(writeText).toHaveBeenCalledWith("How is the Azure-AWS connectivity going?");
+  });
+
+  it("drops the row label when an entry point is one undivided paragraph", () => {
+    const merged = { heading: "Extranet as a service", signal: "One long paragraph covering everything.", solution: "", proof: "" };
+    renderWithProviders(<BriefBento brief={{ ...RICH_BRIEF, entryPoints: [merged] }} />);
+
+    expect(screen.getByText("One long paragraph covering everything.")).toBeInTheDocument();
+    expect(screen.queryByText("Signal")).toBeNull();
+  });
+
+  it("marks the brief confidential in its own language", () => {
+    const { unmount } = renderWithProviders(<BriefBento brief={RICH_BRIEF} />);
+    expect(screen.getByText("CONFIDENTIAL")).toBeInTheDocument();
+    unmount();
+
+    renderWithProviders(<BriefBento brief={{ ...RICH_BRIEF, language: "es", labels: LABELS_ES }} />);
+    expect(screen.getByText("CONFIDENCIAL")).toBeInTheDocument();
   });
 
   it("links each reference to its source in a new tab", () => {

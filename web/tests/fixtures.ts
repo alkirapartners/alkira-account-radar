@@ -13,6 +13,7 @@ export const LABELS_EN: Record<string, string> = {
   proof: "Proof",
   conversation_starters: "Conversation Starters",
   references: "References",
+  confidential: "CONFIDENTIAL",
 };
 
 export const LABELS_ES: Record<string, string> = {
@@ -25,6 +26,7 @@ export const LABELS_ES: Record<string, string> = {
   proof: "Evidencia",
   conversation_starters: "Temas de Conversación",
   references: "Referencias",
+  confidential: "CONFIDENCIAL",
 };
 
 export const RICH_BRIEF: BriefDetail = {
@@ -45,7 +47,8 @@ export const RICH_BRIEF: BriefDetail = {
     { heading: "Zero trust segmentation", signal: "Board mandate.", solution: "Policy overlay.", proof: "NIST aligned." },
     { heading: "M&A integration", signal: "Network sprawl.", solution: "Instant onboarding.", proof: "98% reduction." },
   ],
-  startersMd: '**Stakeholders:** CIO, VP Network\n\n1. "How is the Azure-AWS connectivity going?"\n2. "What is the timeline on zero trust?"',
+  startersMd:
+    '**Stakeholders:** CIO, VP Network\n\n1. "How is the Azure-AWS connectivity going?"\n   *(You\'re listening for: frustration with two clouds.)*\n\n2. "What is the timeline on zero trust?"',
   referencesMd: "[1] TestCo 10-K — https://example.com/10k\n[2] CIO interview — https://example.com/interview",
   language: "en",
   labels: LABELS_EN,

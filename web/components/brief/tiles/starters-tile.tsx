@@ -39,10 +39,15 @@ export function StartersTile({ label, startersMd }: StartersTileProps) {
                   <span className="num pt-1 text-sm text-accent-soft" aria-hidden="true">
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  <p className="min-w-0 flex-1 text-[17px] leading-relaxed text-on-ambient sm:text-xl sm:leading-relaxed">
-                    {question}
-                  </p>
-                  <CopyButton text={question} label={`Copy question ${index + 1}`} tone="ambient" className="-mr-2" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[17px] leading-relaxed text-on-ambient sm:text-xl sm:leading-relaxed">
+                      {question.text}
+                    </p>
+                    {question.hint ? (
+                      <p className="mt-2 max-w-[70ch] text-sm leading-relaxed text-on-ambient-2">{question.hint}</p>
+                    ) : null}
+                  </div>
+                  <CopyButton text={question.text} label={`Copy question ${index + 1}`} tone="ambient" className="-mr-2" />
                 </li>
               ))}
             </ol>

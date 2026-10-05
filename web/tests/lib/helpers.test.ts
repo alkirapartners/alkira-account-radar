@@ -90,7 +90,7 @@ describe("relativeTime", () => {
 });
 
 describe("parseStarters", () => {
-  it("separates the numbered questions from the notes around them", () => {
+  it("separates the numbered questions from the notes before them", () => {
     const md = [
       "**Stakeholders:** CIO, VP Network",
       "",
@@ -102,7 +102,30 @@ describe("parseStarters", () => {
 
     expect(parseStarters(md)).toEqual({
       notes: ["**Stakeholders:** CIO, VP Network", "**Best First Question:** Lead with question #1."],
-      questions: ["How's the Azure-AWS connectivity going?", "What’s the timeline on zero trust?"],
+      questions: [
+        { text: "How's the Azure-AWS connectivity going?", hint: "" },
+        { text: "What’s the timeline on zero trust?", hint: "" },
+      ],
+    });
+  });
+
+  it("keeps each question's listening note with that question", () => {
+    const md = [
+      "**Stakeholders:** CIO",
+      "",
+      '1. "What happens when the WAN contract ends?"',
+      "   *(You're listening for: timeline pressure, manual work.)*",
+      "",
+      '2. "How are the acquisitions connected today?"',
+      "*(Listening for: overlapping systems.)*",
+    ].join("\n");
+
+    expect(parseStarters(md)).toEqual({
+      notes: ["**Stakeholders:** CIO"],
+      questions: [
+        { text: "What happens when the WAN contract ends?", hint: "You're listening for: timeline pressure, manual work." },
+        { text: "How are the acquisitions connected today?", hint: "Listening for: overlapping systems." },
+      ],
     });
   });
 

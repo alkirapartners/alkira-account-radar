@@ -3,7 +3,7 @@
 import { m } from "motion/react";
 
 import type { BriefDetail } from "@/lib/brief-types";
-import { stagger } from "@/lib/motion";
+import { rise, stagger } from "@/lib/motion";
 
 import { EntryPointTile } from "./tiles/entry-point-tile";
 import { InfraTiles, hasInfra } from "./tiles/infra-tiles";
@@ -59,6 +59,11 @@ export function BriefBento({ brief }: BriefBentoProps) {
       ) : null}
       {brief.referencesMd.trim() ? (
         <ReferencesTile label={labels.references ?? "References"} referencesMd={brief.referencesMd} />
+      ) : null}
+      {labels.confidential ? (
+        <m.p variants={rise} className="micro-label col-span-full pt-3 text-center">
+          {labels.confidential}
+        </m.p>
       ) : null}
     </m.div>
   );

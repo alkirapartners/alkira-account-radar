@@ -6,22 +6,38 @@ const WRAPPING_QUOTES = /^["“«]\s*|\s*["”»]$/g;
 // "[1] Title — https://…"  Only web links are accepted: the text comes from a model.
 const REFERENCE_LINE = /^\[(\d+)\]\s*(.+?)\s*[—–-]\s*(https?:\/\/\S+)$/;
 
-export interface Starters {
-  /** Lines around the questions (stakeholders, which question to lead with). Markdown. */
-  notes: string[];
-  /** The numbered questions, without numbers or wrapping quotes. */
-  questions: string[];
+export interface StarterQuestion {
+  /** The question, without its number or wrapping quotes. */
+  text: string;
+  /** What to listen for in the answer, when the brief gives it. Empty otherwise. */
+  hint: string;
 }
+
+export interface Starters {
+  /** Lines before the first question (stakeholders, which question to lead with). Markdown. */
+  notes: string[];
+  questions: StarterQuestion[];
+}
+
+/** "*(You're listening for: …)*" → "You're listening for: …" */
+const unwrapHint = (line: string) => line.replace(/^[*_]*\(?\s*/, "").replace(/\s*\)?[*_]*$/, "");
 
 export function parseStarters(md: string): Starters {
   const notes: string[] = [];
-  const questions: string[] = [];
+  const questions: StarterQuestion[] = [];
   for (const line of md.split("\n")) {
     const text = line.trim();
     if (!text) continue;
     const numbered = NUMBERED_LINE.exec(text);
-    if (numbered) questions.push(numbered[1].replace(WRAPPING_QUOTES, ""));
-    else notes.push(text);
+    const current = questions.at(-1);
+    if (numbered) {
+      questions.push({ text: numbered[1].replace(WRAPPING_QUOTES, ""), hint: "" });
+    } else if (current) {
+      // A line under a question belongs to it: the brief's "listening for" note.
+      current.hint = [current.hint, unwrapHint(text)].filter(Boolean).join(" ");
+    } else {
+      notes.push(text);
+    }
   }
   return { notes, questions };
 }

@@ -15,6 +15,7 @@ const LABELS = {
     proof: "Proof",
     conversation_starters: "Conversation Starters",
     references: "References",
+    confidential: "CONFIDENTIAL",
   },
   es: {
     alkira_fit: "Ajuste Alkira",
@@ -30,6 +31,7 @@ const LABELS = {
     proof: "Evidencia",
     conversation_starters: "Temas de Conversación",
     references: "Referencias",
+    confidential: "CONFIDENCIAL",
   },
 };
 
@@ -82,8 +84,13 @@ const NORTHWIND = {
     "**Best first question:** Lead with question 1.",
     "",
     '1. "With the MPLS contracts ending in 2027, are you replacing like for like or rethinking the backbone?"',
+    "   *(You're listening for: timeline pressure and appetite for change. Alkira replaces MPLS without building transit hubs.)*",
+    "",
     '2. "How are Redline and Baywater connected to your core network today, and what is still on the list?"',
+    "   *(You're listening for: overlapping systems and manual work. Alkira onboards acquired networks without re-addressing.)*",
+    "",
     '3. "When a new workload needs to reach both AWS and Azure, how long does that take your team?"',
+    "   *(You're listening for: frustration with multi-cloud complexity. Alkira connects clouds 96% faster.)*",
   ].join("\n"),
   referencesMd: [
     "[1] Northwind FY2025 annual report — https://example.com/northwind/annual-report",

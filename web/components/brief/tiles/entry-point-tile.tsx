@@ -20,6 +20,9 @@ const ROWS: ReadonlyArray<{ key: "signal" | "solution" | "proof"; fallback: stri
 export function EntryPointTile({ point, index, labels, className }: EntryPointTileProps) {
   const headingId = `entry-point-${index}`;
   const number = String(index + 1).padStart(2, "0");
+  const rows = ROWS.filter((row) => point[row.key]);
+  // Older briefs hold one undivided paragraph; a lone "Signal" label over it would mislabel it.
+  const showLabels = rows.length > 1;
 
   return (
     <Tile labelledBy={headingId} className={className}>
@@ -30,14 +33,22 @@ export function EntryPointTile({ point, index, labels, className }: EntryPointTi
       <h2 id={headingId} className="mt-4 text-xl font-semibold leading-snug tracking-heading">
         {point.heading}
       </h2>
-      <dl className="mt-5 divide-y divide-line border-t border-line">
-        {ROWS.filter((row) => point[row.key]).map((row) => (
-          <div key={row.key} className="py-4 last:pb-0">
-            <dt className="micro-label">{labels[row.key] ?? row.fallback}</dt>
-            <dd className="mt-2 text-[15px] leading-relaxed text-ink">{point[row.key]}</dd>
-          </div>
-        ))}
-      </dl>
+      {showLabels ? (
+        <dl className="mt-5 divide-y divide-line border-t border-line">
+          {rows.map((row) => (
+            <div key={row.key} className="py-4 last:pb-0">
+              <dt className="micro-label">{labels[row.key] ?? row.fallback}</dt>
+              <dd className="mt-2 text-[15px] leading-relaxed text-ink">{point[row.key]}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : (
+        rows.map((row) => (
+          <p key={row.key} className="mt-5 border-t border-line pt-4 text-[15px] leading-relaxed text-ink">
+            {point[row.key]}
+          </p>
+        ))
+      )}
     </Tile>
   );
 }
