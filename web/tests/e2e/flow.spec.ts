@@ -6,7 +6,7 @@ test.describe("radar flow", () => {
   });
 
   test("paste 3 accounts and see streaming results", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/radar");
     await page.locator("textarea#accounts").fill("Acme\nGlobex\nInitech");
     await page.getByRole("button", { name: /score accounts/i }).click();
 
@@ -21,7 +21,7 @@ test.describe("radar flow", () => {
   });
 
   test("41 accounts blocks with friendly error", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/radar");
     const big = Array.from({ length: 41 }, (_, i) => `Co${i}`).join("\n");
     await page.locator("textarea#accounts").fill(big);
     await page.getByRole("button", { name: /score accounts/i }).click();

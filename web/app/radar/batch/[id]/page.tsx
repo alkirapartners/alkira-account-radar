@@ -6,7 +6,6 @@ import { BatchView } from "./batch-view";
 import type { Batch } from "@/lib/types";
 
 const API_INTERNAL = process.env.RADAR_API_INTERNAL ?? "http://127.0.0.1:8601";
-const BRIEFGEN_URL = process.env.NEXT_PUBLIC_BRIEFGEN_URL ?? "";
 
 async function loadBatch(id: string, authEmail: string | null): Promise<Batch | null> {
   const res = await fetch(`${API_INTERNAL}/api/radar/batch/${encodeURIComponent(id)}`, {
@@ -29,7 +28,7 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 p-8">
-      <Link href="/" className="text-sm text-accent hover:underline">← Back to new batch</Link>
+      <Link href="/radar" className="text-sm text-accent hover:underline">← Back to new batch</Link>
       <header>
         <h1 className="text-2xl font-bold">Batch {batch.id.slice(0, 8)}</h1>
         <p className="text-sm text-ink/60">
@@ -37,7 +36,7 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
         </p>
         <p className="mt-2 text-sm font-medium">{formatSummary(summary)}</p>
       </header>
-      <BatchView batch={batch} briefgenUrl={BRIEFGEN_URL} />
+      <BatchView batch={batch} />
     </main>
   );
 }

@@ -19,7 +19,7 @@ export function HistorySidebar({ batches, activeId }: Props) {
           {batches.map((b) => (
             <li key={b.id}>
               <Link
-                href={{ pathname: `/batch/${b.id}` }}
+                href={`/radar/batch/${b.id}`}
                 className={`block rounded-md px-3 py-2 text-sm hover:bg-ink/5 ${
                   activeId === b.id ? "bg-ink/5 font-medium" : ""
                 }`}

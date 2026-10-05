@@ -1,16 +1,15 @@
 import { ScoreBadge } from "./score-badge";
-import { briefUrl, rowState } from "@/lib/row-state";
+import { briefHref, rowState } from "@/lib/row-state";
 import type { ResultRow as Row } from "@/lib/types";
 
 interface Props {
   row: Row;
-  briefgenUrl: string;
   onDelete?: (id: string) => void;
 }
 
-export function ResultRow({ row, briefgenUrl, onDelete }: Props) {
+export function ResultRow({ row, onDelete }: Props) {
   const state = rowState(row);
-  const handoff = briefUrl(row, briefgenUrl);
+  const handoff = briefHref(row);
   // A row still streaming in has no reasons field yet.
   const reasons = row.reasons ?? [];
 

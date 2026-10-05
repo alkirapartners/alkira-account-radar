@@ -46,13 +46,13 @@ export function formatSummary(summary: Summary): string {
   return parts.join(", ");
 }
 
-/** Link into brief-gen for a finished row; an unscored one falls back to the typed name. */
-export function briefUrl(row: ResultRow, briefgenUrl: string): string | null {
+/** Link into the Brief Generator for a finished row; an unscored one falls back to the typed name. */
+export function briefHref(row: ResultRow): string | null {
   const state = rowState(row);
   if (state === "pending" || state === "error") return null;
   const params = new URLSearchParams({
     company: row.resolved_name ?? row.account_name,
     ...(row.resolved_domain ? { domain: row.resolved_domain } : {}),
   });
-  return `${briefgenUrl}/?${params.toString()}`;
+  return `/?${params.toString()}`;
 }
