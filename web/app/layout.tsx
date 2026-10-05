@@ -2,6 +2,7 @@ import "./globals.css";
 
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { connection } from "next/server";
 
 import { Providers } from "@/components/providers";
 import { PageTransition } from "@/components/shell/page-transition";
@@ -31,7 +32,10 @@ export const viewport: Viewport = {
   themeColor: "#F5F5F3",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Every page carries a per-request script nonce (see proxy.ts), so nothing can be prerendered.
+  await connection();
+
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body>
