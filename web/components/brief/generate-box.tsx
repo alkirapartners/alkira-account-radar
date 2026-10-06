@@ -157,7 +157,7 @@ export function GenerateBox({ state, prefill, latest, onGenerate }: GenerateBoxP
                     </Button>
                   </div>
                   <p className="mt-5 text-sm text-on-ambient-2">
-                    Takes about a minute. Research from the last 7 days is reused.
+                    Takes about two minutes. Research from the last 14 days is reused.
                   </p>
                 </form>
                 </div>

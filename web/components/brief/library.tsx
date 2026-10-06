@@ -34,7 +34,7 @@ const SKELETON_ROWS = 5;
 
 const HOW_IT_WORKS = [
   { icon: Type, title: "Enter a company", text: "Any company name. Nothing else is needed." },
-  { icon: Globe, title: "It gets researched", text: "Eight web searches, then the best five pages are read." },
+  { icon: Globe, title: "It gets researched", text: "It works out exactly which company you mean, then searches and reads sources and checks the evidence." },
   { icon: FileText, title: "You get a scored brief", text: "Alkira fit from 1 to 5, entry points, proof and questions." },
 ];
 

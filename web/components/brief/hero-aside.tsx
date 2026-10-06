@@ -21,8 +21,8 @@ const GLASS =
 
 const WHAT_YOU_GET = [
   { icon: Type, text: "Type any company name" },
-  { icon: Globe, text: "Eight searches, the best five pages read" },
-  { icon: FileText, text: "A fit score, three entry points, questions to ask" },
+  { icon: Globe, text: "Sources searched and read, the evidence checked" },
+  { icon: FileText, text: "A fit score, entry points, questions to ask" },
 ];
 
 /** The right side of the generate box: the latest brief to pick back up, or what to expect on a first visit. */
