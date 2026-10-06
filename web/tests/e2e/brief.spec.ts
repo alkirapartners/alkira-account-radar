@@ -185,7 +185,19 @@ test.describe("a brief's page", () => {
 
     await page.keyboard.press("Space");
     await expect(page.getByRole("menuitem", { name: "PDF" })).toBeFocused();
+    // The menu starts listening for clicks outside it as it opens; let it finish opening before clicking away.
+    await page.getByRole("menu").evaluate((menu) => Promise.all(menu.getAnimations().map((animation) => animation.finished)));
     await page.mouse.click(5, 400);
+    await expect(page.getByRole("menu")).toHaveCount(0);
+
+    // Enter on an option downloads it, as a click does.
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("ArrowDown");
+    await expect(page.getByRole("menuitem", { name: "Word (.docx)" })).toBeFocused();
+    const download = page.waitForEvent("download");
+    await page.keyboard.press("Enter");
+    expect((await download).suggestedFilename()).toBe("AlkiraBrief_Harbor-Fuels.docx");
     await expect(page.getByRole("menu")).toHaveCount(0);
   });
 

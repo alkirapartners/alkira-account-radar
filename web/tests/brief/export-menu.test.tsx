@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { BriefActions } from "@/components/brief/brief-actions";
 
@@ -24,10 +24,6 @@ function setup({ hasDocument = true, disabled = false, compact = false }: Setup 
   );
   return { ...view, onUpdate, onDelete, exportButton: () => screen.getByRole("button", { name: "Export" }) };
 }
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
 
 describe("a brief that carries a document", () => {
   it("offers one Export button where the Download PDF button used to be", () => {
