@@ -120,22 +120,25 @@ function AngleHeading({ angle, number, headingId, language, copy }: AngleParts &
 }
 
 /**
- * One reason to call, and the proof that Alkira has done it before. On a wide
- * screen the card is a row of two zones: the company's situation on the left,
- * Alkira's side on the right with the proof at the top, level with the title,
- * so title and proof are read together. Angles differ a lot in how much
- * evidence they have; a row each means no card is stretched to match another.
- * On a narrow screen the zones stack in reading order, proof last.
+ * One reason to call, and the proof that Alkira has done it before.
+ *
+ * On a wide screen the card has two bands. The first is the pitch: the angle
+ * and what Alkira does about it on the left, the proof on the right, so the
+ * three are read together. The second is the evidence, run across the whole
+ * card in columns. An angle with four facts and one with a single fact both
+ * fill their card, and nothing is stretched or left hollow to match the other.
+ * On a narrow screen the parts stack in the same order.
  */
 export function AngleCard({ angle, number, references, labels, language, copy }: AngleCardProps) {
   const headingId = `${angleAnchor(number)}-heading`;
+  const answer = angle.alkira.trim();
 
   return (
     <m.article
       variants={rise}
       id={angleAnchor(number)}
       aria-labelledby={headingId}
-      className="card relative isolate flex scroll-mt-16 flex-col p-2 lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-x-2"
+      className="card relative isolate scroll-mt-16 p-2 lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-x-2"
     >
       {hasDeal(angle) ? (
         // A warm wash in the corner marks the angle that has a clock on it.
@@ -148,26 +151,24 @@ export function AngleCard({ angle, number, references, labels, language, copy }:
 
       <div className="p-4 sm:p-5 lg:p-6">
         <AngleHeading angle={angle} number={number} headingId={headingId} language={language} copy={copy} />
-        <EvidenceList
-          evidence={angle.evidence}
-          references={references}
-          labels={labels}
-          language={language}
-          sourceLabel={copy.source}
-        />
+        {answer ? (
+          <>
+            <h4 className="micro-label mt-6 text-accent">{labels.alkira_answer ?? "What Alkira does"}</h4>
+            <p className="mt-2.5 max-w-[64ch] text-[15px] leading-relaxed text-ink">{answer}</p>
+          </>
+        ) : null}
       </div>
 
-      {/* In the document the answer comes before the proof. On a wide screen the proof is shown first,
-          and the zone stays in view while a long list of evidence scrolls past it. */}
-      <div className="flex flex-col lg:sticky lg:top-[calc(var(--bar-height)+72px)] lg:flex-col-reverse lg:self-start">
-        {angle.alkira.trim() ? (
-          <div className="border-t border-line p-4 sm:p-5 lg:border-t-0 lg:p-6">
-            <h4 className="micro-label text-accent">{labels.alkira_answer ?? "What Alkira does"}</h4>
-            <p className="mt-2.5 text-[15px] leading-relaxed text-ink">{angle.alkira}</p>
-          </div>
-        ) : null}
-        <ProofPlate story={angle.story} labels={labels} noStoryNote={copy.noStory} />
-      </div>
+      <ProofPlate story={angle.story} labels={labels} noStoryNote={copy.noStory} />
+
+      <EvidenceList
+        evidence={angle.evidence}
+        references={references}
+        labels={labels}
+        language={language}
+        sourceLabel={copy.source}
+        className="mt-2 border-t border-line p-4 sm:p-5 lg:col-span-2 lg:p-6"
+      />
     </m.article>
   );
 }

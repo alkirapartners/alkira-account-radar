@@ -74,6 +74,14 @@ export function referenceDate(reference: DocReference, language: string): DateSt
   return { kind: reference.openPosting ? "open" : "dated", date };
 }
 
+// The API's own test (brief_compat._SAYS_UNDATED) for a line that already says its source has no date.
+const SAYS_UNDATED = /\bundated\b|\bsin fecha\b|\bno date\b/i;
+
+/** True when a line states that its source is undated, so the page does not label it "source undated" as well. */
+export function saysUndated(text: string): boolean {
+  return SAYS_UNDATED.test(text);
+}
+
 const DEFAULT_OPEN_POSTING = "open posting, seen {date}";
 const DEFAULT_UNDATED = "source undated";
 const DATE_SLOT = "{date}";
@@ -212,4 +220,17 @@ export function splitLead(lead: string): { first: string; rest: string } {
   const end = SENTENCE_END.exec(text);
   if (!end) return { first: text, rest: "" };
   return { first: text.slice(0, end.index + 1), rest: text.slice(end.index + end[0].length) };
+}
+
+const MAX_EVIDENCE_COLUMNS = 3;
+
+/**
+ * How many columns an angle's evidence is set in on a wide screen. Evidence
+ * runs across the card, so its height grows slowly with its length: one fact
+ * has the row to itself, two and four make pairs, three and six make threes.
+ */
+export function evidenceColumns(count: number): 1 | 2 | 3 {
+  if (count <= 1) return 1;
+  if (count % MAX_EVIDENCE_COLUMNS === 0) return 3;
+  return count % 2 === 0 ? 2 : 3;
 }

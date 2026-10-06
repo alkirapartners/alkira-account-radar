@@ -3,12 +3,14 @@ import { describe, expect, it } from "vitest";
 import {
   displayUrl,
   emphasiseNumbers,
+  evidenceColumns,
   evidenceDate,
   isProofPoint,
   readDoc,
   readableDate,
   referenceDate,
   referenceTitle,
+  saysUndated,
   splitCustomer,
   splitLead,
   splitMetric,
@@ -148,6 +150,30 @@ describe("splitLead", () => {
       rest: "Call the network lead. Bring the design.",
     });
     expect(splitLead("Open with the separation")).toEqual({ first: "Open with the separation", rest: "" });
+  });
+});
+
+describe("evidenceColumns", () => {
+  it("spreads evidence across the card so no row is left with a hole", () => {
+    expect([1, 2, 3, 4, 6].map(evidenceColumns)).toEqual([1, 2, 3, 2, 3]);
+  });
+
+  it("uses three columns for any other count", () => {
+    expect(evidenceColumns(5)).toBe(3);
+    expect(evidenceColumns(0)).toBe(1);
+  });
+});
+
+describe("saysUndated", () => {
+  it("knows when a line already says its source is undated, in either language", () => {
+    expect(saysUndated("Runs in AWS China (undated AWS partner case study).")).toBe(true);
+    expect(saysUndated("Según un caso de estudio sin fecha.")).toBe(true);
+    expect(saysUndated("The case study gives no date.")).toBe(true);
+  });
+
+  it("does not mistake other words for it", () => {
+    expect(saysUndated("Overseas revenue was 96.62% of the 2025 total.")).toBe(false);
+    expect(saysUndated("The plan was updated in May.")).toBe(false);
   });
 });
 
