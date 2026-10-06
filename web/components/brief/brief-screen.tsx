@@ -21,8 +21,7 @@ import { ApiError } from "@/lib/session";
 
 import { AmbientPanel } from "./ambient-panel";
 import { BriefActions } from "./brief-actions";
-import { BriefBento } from "./brief-bento";
-import { BriefHeader } from "./brief-header";
+import { BriefBody, BriefTop } from "./brief-layout";
 import { BriefSkeleton } from "./brief-skeleton";
 import { PinnedBar } from "./pinned-bar";
 import { ProgressView } from "./progress-view";
@@ -158,7 +157,7 @@ export function BriefScreen({ id }: BriefScreenProps) {
       <PinnedBar visible={pastHeader && !updating} company={data.company} score={data.score} actions={actions(true)} />
 
       <m.article variants={stagger(0.06)} initial="hidden" animate="shown" className="page pb-24 pt-4 sm:pt-6">
-        <BriefHeader brief={data} reusedFrom={reusedFrom} actions={actions(false)} />
+        <BriefTop brief={data} reusedFrom={reusedFrom} actions={actions(false)} />
         <div ref={headerEnd} aria-hidden="true" className="h-px" />
 
         {update.state.status === "error" ? (
@@ -187,7 +186,7 @@ export function BriefScreen({ id }: BriefScreenProps) {
               </AmbientPanel>
             </m.div>
           ) : (
-            <BriefBento brief={data} />
+            <BriefBody brief={data} />
           )}
         </div>
       </m.article>
