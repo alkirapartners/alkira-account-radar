@@ -20,7 +20,11 @@ export function useScrolledPast<T extends Element>(rootMargin = "0px"): [(node: 
       return;
     }
     const observer = new IntersectionObserver(
-      ([entry]) => {
+      (entries) => {
+        // Two quick scrolls within one frame (a jump from the top of the page to deep inside it)
+        // arrive as two readings, oldest first. Only the newest says where the sentinel is now.
+        const entry = entries.at(-1);
+        if (!entry) return;
         // Out of view below the fold is "not reached yet", not "scrolled past".
         const rootTop = entry.rootBounds?.top ?? 0;
         setPast(!entry.isIntersecting && entry.boundingClientRect.top <= rootTop);
