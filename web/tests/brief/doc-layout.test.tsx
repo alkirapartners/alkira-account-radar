@@ -2,11 +2,16 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { BriefBody, BriefTop } from "@/components/brief/brief-layout";
+import { BriefActions } from "@/components/brief/brief-actions";
+import { BriefBento } from "@/components/brief/brief-bento";
+import { BriefHeader } from "@/components/brief/brief-header";
+import { BriefBody, BriefNav, BriefTop, hasDocLayout } from "@/components/brief/brief-layout";
+import { SectionLinks } from "@/components/brief/doc/section-nav";
+import { PinnedBar } from "@/components/brief/pinned-bar";
 import type { BriefDetail, BriefDoc } from "@/lib/brief-types";
 
 import { DOC, DOC_BRIEF } from "../doc-fixture";
-import { RICH_BRIEF } from "../fixtures";
+import { LABELS_ES, RICH_BRIEF, SPARSE_BRIEF } from "../fixtures";
 import { renderWithProviders } from "../render";
 
 const NEW_HEADINGS = ["Why this account, why now", "Ask this", "For the engineer", "Who to talk to"];
@@ -47,6 +52,111 @@ describe("which layout a brief gets", () => {
   });
 });
 
+/**
+ * The markup a component renders, so two renderings can be compared exactly.
+ * The menu library numbers its ids per render; those numbers are evened out.
+ */
+function markup(ui: React.ReactElement): string {
+  const view = renderWithProviders(ui);
+  const html = view.container.innerHTML.replace(/radix-[^"\s]+/g, "radix-id");
+  view.unmount();
+  return html;
+}
+
+// Production today: the API sends no document, and every stored brief is legacy markdown.
+// This change must be safe to deploy before the backend that sends documents, and after it.
+describe("a response with no document", () => {
+  const LEGACY: Record<string, BriefDetail> = {
+    "as the API sends it today, with no document field": RICH_BRIEF,
+    "as the new API sends a legacy brief, with a null document": { ...RICH_BRIEF, format: 1, doc: null },
+    "with nothing in it": SPARSE_BRIEF,
+    "in Spanish": { ...RICH_BRIEF, language: "es", labels: LABELS_ES },
+  };
+
+  for (const [name, brief] of Object.entries(LEGACY)) {
+    it(`renders exactly what the page rendered before, ${name}`, () => {
+      const actions = <button type="button">Act</button>;
+
+      expect(hasDocLayout(brief)).toBe(false);
+      expect(markup(<BriefBody brief={brief} />)).toBe(markup(<BriefBento brief={brief} />));
+      expect(markup(<BriefTop brief={brief} reusedFrom="2026-09-30" actions={actions} />)).toBe(
+        markup(<BriefHeader brief={brief} reusedFrom="2026-09-30" actions={actions} />),
+      );
+    });
+  }
+
+  it("adds nothing to the pinned bar, and keeps Update as a button there", () => {
+    const actions = (updateButtonFrom?: "md" | "xl") => (
+      <BriefActions briefId="b" disabled={false} onUpdate={() => {}} onDelete={() => {}} compact updateButtonFrom={updateButtonFrom} />
+    );
+    const before = markup(<PinnedBar visible company="TestCo" score={4} actions={actions()} />);
+    const now = markup(
+      <PinnedBar
+        visible
+        company="TestCo"
+        score={4}
+        actions={actions(hasDocLayout(RICH_BRIEF) ? "xl" : "md")}
+        nav={<BriefNav brief={RICH_BRIEF} />}
+      />,
+    );
+
+    expect(now).toBe(before);
+    expect(now).not.toContain("<nav");
+  });
+});
+
+describe("the section jump nav", () => {
+  const SECTIONS = [
+    { id: "why-now", label: "Why now" },
+    { id: "engineer", label: "For the engineer" },
+  ];
+
+  it("links to each section and marks the one being read", () => {
+    renderWithProviders(<SectionLinks sections={SECTIONS} active="engineer" label="On this page" />);
+
+    const nav = screen.getByRole("navigation", { name: "On this page" });
+    expect(within(nav).getByRole("link", { name: "Why now" })).toHaveAttribute("href", "#why-now");
+    expect(within(nav).getByRole("link", { name: "Why now" })).not.toHaveAttribute("aria-current");
+    expect(within(nav).getByRole("link", { name: "For the engineer" })).toHaveAttribute("aria-current", "location");
+  });
+
+  it("is left out when there is nowhere to jump between", () => {
+    renderWithProviders(<SectionLinks sections={SECTIONS.slice(0, 1)} active={null} label="On this page" />);
+
+    expect(screen.queryByRole("navigation")).toBeNull();
+  });
+
+  it("lists the document's sections, each of which the page gives an anchor", () => {
+    renderWithProviders(
+      <>
+        <BriefNav brief={DOC_BRIEF} />
+        <BriefBody brief={DOC_BRIEF} />
+      </>,
+    );
+
+    const links = within(screen.getByRole("navigation", { name: "On this page" })).getAllByRole("link");
+    expect(links.map((link) => link.textContent)).toEqual(["Why now", "Ask this", "For the engineer", "Who to talk to", "References"]);
+    for (const link of links) {
+      const target = document.getElementById((link.getAttribute("href") ?? "").slice(1));
+      expect(target, link.textContent ?? "").not.toBeNull();
+    }
+    expect(hasDocLayout(DOC_BRIEF)).toBe(true);
+  });
+
+  it("moves Update into the menu sooner when it shares the pinned bar with the nav", () => {
+    const actions = (updateButtonFrom: "md" | "xl") => (
+      <BriefActions briefId="b" disabled={false} onUpdate={() => {}} onDelete={() => {}} compact updateButtonFrom={updateButtonFrom} />
+    );
+    const { unmount } = renderWithProviders(actions("md"));
+    expect(screen.getByRole("button", { name: "Update brief" })).toHaveClass("md:inline-flex");
+    unmount();
+
+    renderWithProviders(actions("xl"));
+    expect(screen.getByRole("button", { name: "Update brief" })).toHaveClass("xl:inline-flex");
+    expect(screen.getByRole("button", { name: "Update brief" })).not.toHaveClass("md:inline-flex");
+  });
+});
+
 describe("the document layout", () => {
   it("opens with the score, its verdict and the lead", () => {
     renderWithProviders(<BriefBody brief={DOC_BRIEF} />);
@@ -69,6 +179,19 @@ describe("the document layout", () => {
 
     const china = screen.getByRole("article", { name: "China and global systems joined by a dedicated line" });
     expect(within(china).getByText("Source undated")).toBeInTheDocument();
+  });
+
+  it("says a source is undated once: not again as a label when the line says so itself", () => {
+    const evidence = [
+      { text: "Core ERP runs in the AWS China region (undated AWS case study).", date: "", sources: [3] },
+      { text: "Overseas revenue was most of the 2025 total.", date: "", sources: [3] },
+    ];
+    renderWithProviders(<BriefBody brief={withDoc({ angles: [{ ...DOC.angles[1], evidence }] })} />);
+
+    const china = screen.getByRole("article", { name: "China and global systems joined by a dedicated line" });
+    expect(within(china).getAllByText("Source undated")).toHaveLength(1);
+    // Both lines still cite their source.
+    expect(within(china).getAllByRole("link", { name: /^Source 3/ })).toHaveLength(2);
   });
 
   it("marks a pending deal as time-sensitive, in the source's own words", () => {

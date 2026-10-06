@@ -1,6 +1,10 @@
 // Finds the technology terms in a line of the technical snapshot, so the page
 // can set them apart from the words around them. A reading aid only: the list
 // is a best guess kept here, and a term it misses is simply left as plain text.
+//
+// TODO: the API should own this. The writer knows which words in a snapshot
+// line are products, vendors and protocols; when the document marks them
+// (for example as spans beside each line's text), this word list goes.
 
 export interface TechToken {
   text: string;
