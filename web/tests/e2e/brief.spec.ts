@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { MISSING_BRIEF, RICH_BRIEF, SPANISH_BRIEF, SPARSE_BRIEF, generateBrief } from "./helpers";
+import { DOC_BRIEF, MISSING_BRIEF, RICH_BRIEF, SPANISH_BRIEF, SPARSE_BRIEF, generateBrief } from "./helpers";
 
 test.describe("generating a brief", () => {
   test("writes a brief and opens its own page", async ({ page }) => {
@@ -127,6 +127,79 @@ test.describe("a brief's page", () => {
     const response = await request.get(`/api/brief/briefs/${RICH_BRIEF}/pdf`);
     expect(response.headers()["content-type"]).toBe("application/pdf");
     expect((await response.body()).subarray(0, 4).toString()).toBe("%PDF");
+  });
+
+  test("a legacy brief keeps its one Download PDF button and has no Export menu", async ({ page }) => {
+    await page.goto(`/briefs/${RICH_BRIEF}`);
+    await expect(page.getByRole("heading", { level: 1, name: "Northwind Logistics" })).toBeVisible();
+
+    await expect(page.getByRole("link", { name: /download pdf/i }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: "Export" })).toHaveCount(0);
+  });
+
+  test("a brief with a document offers PDF and Word from one Export menu", async ({ page }) => {
+    await page.goto(`/briefs/${DOC_BRIEF}`);
+    await expect(page.getByRole("heading", { level: 1, name: "Harbor Fuels" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /download pdf/i })).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Export" }).first().click();
+
+    const menu = page.getByRole("menu", { name: "Export" });
+    await expect(menu.getByRole("menuitem", { name: "PDF" })).toHaveAttribute("href", `/api/brief/briefs/${DOC_BRIEF}/pdf`);
+    await expect(menu.getByRole("menuitem", { name: "Word (.docx)" })).toHaveAttribute("href", `/api/brief/briefs/${DOC_BRIEF}/docx`);
+  });
+
+  test("each Export option downloads its file, and the menu closes", async ({ page }) => {
+    await page.goto(`/briefs/${DOC_BRIEF}`);
+    await expect(page.getByRole("heading", { level: 1, name: "Harbor Fuels" })).toBeVisible();
+    const choices = [
+      { option: "Word (.docx)", file: "AlkiraBrief_Harbor-Fuels.docx" },
+      { option: "PDF", file: "AlkiraBrief_Harbor-Fuels.pdf" },
+    ];
+
+    for (const { option, file } of choices) {
+      await page.getByRole("button", { name: "Export" }).first().click();
+      const download = page.waitForEvent("download");
+      await page.getByRole("menuitem", { name: option }).click();
+
+      expect((await download).suggestedFilename()).toBe(file);
+      await expect(page.getByRole("menu")).toHaveCount(0);
+      await expect(page).toHaveURL(new RegExp(`/briefs/${DOC_BRIEF}$`));
+    }
+  });
+
+  test("the Export menu works from the keyboard alone", async ({ page }) => {
+    await page.goto(`/briefs/${DOC_BRIEF}`);
+    await expect(page.getByRole("heading", { level: 1, name: "Harbor Fuels" })).toBeVisible();
+    const trigger = page.getByRole("button", { name: "Export" }).first();
+
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("menuitem", { name: "PDF" })).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(page.getByRole("menuitem", { name: "Word (.docx)" })).toBeFocused();
+
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("menu")).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+
+    await page.keyboard.press("Space");
+    await expect(page.getByRole("menuitem", { name: "PDF" })).toBeFocused();
+    // The menu starts listening for clicks outside it as it opens; let it finish opening before clicking away.
+    await page.getByRole("menu").evaluate((menu) => Promise.all(menu.getAnimations().map((animation) => animation.finished)));
+    await page.mouse.click(5, 400);
+    await expect(page.getByRole("menu")).toHaveCount(0);
+
+    // Enter on an option downloads it, as a click does.
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("menuitem", { name: "PDF" })).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(page.getByRole("menuitem", { name: "Word (.docx)" })).toBeFocused();
+    const download = page.waitForEvent("download");
+    await page.keyboard.press("Enter");
+    expect((await download).suggestedFilename()).toBe("AlkiraBrief_Harbor-Fuels.docx");
+    await expect(page.getByRole("menu")).toHaveCount(0);
   });
 
   test("copies a conversation starter", async ({ page, context }) => {

@@ -7,8 +7,15 @@ import { Button, buttonClasses } from "@/components/ui/button";
 import { pdfHref } from "@/lib/brief-api";
 import { cn } from "@/lib/cn";
 
+import { ExportMenu } from "./export-menu";
+
 interface BriefActionsProps {
   briefId: string;
+  /**
+   * True for a brief stored as a document. Only those can be exported as Word, so only they get the
+   * Export menu; a legacy brief keeps its one Download PDF button.
+   */
+  hasDocument?: boolean;
   /** True while an update is running: the brief is about to be replaced. */
   disabled: boolean;
   onUpdate: () => void;
@@ -30,6 +37,7 @@ const UPDATE_MENU_ITEM: Record<UpdateBreakpoint, string> = { md: "md:hidden", xl
 
 export function BriefActions({
   briefId,
+  hasDocument = false,
   disabled,
   onUpdate,
   onDelete,
@@ -41,16 +49,20 @@ export function BriefActions({
 
   return (
     <div className={cn("flex items-center gap-2", compact ? "shrink-0" : "w-full flex-wrap sm:flex-nowrap lg:w-auto lg:shrink-0")}>
-      {/* A plain link: the browser downloads it with the session cookie, and an
-          expired session lands on sign-in instead of saving an HTML page. */}
-      <a
-        href={pdfHref(briefId)}
-        aria-disabled={disabled || undefined}
-        className={cn(buttonClasses("primary", size), !compact && "basis-full sm:basis-auto", disabled && "pointer-events-none opacity-50")}
-      >
-        <Download className="h-4 w-4" aria-hidden="true" />
-        Download PDF
-      </a>
+      {hasDocument ? (
+        <ExportMenu briefId={briefId} disabled={disabled} size={size} compact={compact} />
+      ) : (
+        /* A plain link: the browser downloads it with the session cookie, and an
+           expired session lands on sign-in instead of saving an HTML page. */
+        <a
+          href={pdfHref(briefId)}
+          aria-disabled={disabled || undefined}
+          className={cn(buttonClasses("primary", size), !compact && "basis-full sm:basis-auto", disabled && "pointer-events-none opacity-50")}
+        >
+          <Download className="h-4 w-4" aria-hidden="true" />
+          Download PDF
+        </a>
+      )}
       <Button variant="secondary" size={size} onClick={onUpdate} disabled={disabled} className={compact ? UPDATE_BUTTON[updateButtonFrom] : "flex-1 sm:flex-none"}>
         <RefreshCw className="h-4 w-4" aria-hidden="true" />
         Update brief

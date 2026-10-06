@@ -6,9 +6,9 @@ import { cn } from "@/lib/cn";
 import type { BriefPhase } from "@/lib/brief-types";
 
 export const STEPS: ReadonlyArray<{ phase: BriefPhase; label: string; detail: string }> = [
-  { phase: "init", label: "Starting", detail: "Setting up the research run" },
-  { phase: "research", label: "Researching", detail: "Running 8 web searches" },
-  { phase: "analyze", label: "Analyzing", detail: "Ranking results and reading the top 5 pages" },
+  { phase: "init", label: "Starting", detail: "Working out exactly which company this is" },
+  { phase: "research", label: "Researching", detail: "Searching and reading sources, following leads such as careers pages, filings and press releases" },
+  { phase: "analyze", label: "Analyzing", detail: "Checking the evidence and scoring the fit" },
   { phase: "compose", label: "Composing", detail: "Writing the brief from those sources" },
 ];
 

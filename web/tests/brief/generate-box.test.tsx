@@ -96,7 +96,7 @@ describe("GenerateBox", () => {
     expect(screen.queryByLabelText("Company")).toBeNull();
     expect(screen.getByRole("heading", { name: "Acme Robotics" })).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Step 2 of 4: Researching");
-    expect(screen.getByRole("status")).toHaveTextContent("Running 8 web searches");
+    expect(screen.getByRole("status")).toHaveTextContent("Searching and reading sources, following leads");
     expect(screen.getByText(/you can leave this page/i)).toBeInTheDocument();
   });
 

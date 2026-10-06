@@ -140,6 +140,13 @@
   }
 }
 
+@keyframes menu-out {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -1,11 +1,12 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-import { RICH_BRIEF, generateBrief, hasHorizontalOverflow } from "./helpers";
+import { DOC_BRIEF, RICH_BRIEF, generateBrief, hasHorizontalOverflow } from "./helpers";
 
 const SCREENS = [
   { name: "home", path: "/" },
   { name: "brief", path: `/briefs/${RICH_BRIEF}` },
+  { name: "document brief", path: `/briefs/${DOC_BRIEF}` },
   { name: "radar", path: "/radar" },
 ];
 const WIDTHS = [320, 768, 1024, 1440];
@@ -26,7 +27,35 @@ test.describe("accessibility", () => {
   }
 });
 
+test.describe("the Export menu", () => {
+  test("has no serious accessibility violations while it is open", async ({ page }) => {
+    await page.goto(`/briefs/${DOC_BRIEF}`);
+    await page.waitForTimeout(SETTLE_MS);
+    await page.getByRole("button", { name: "Export" }).first().click();
+    await expect(page.getByRole("menu", { name: "Export" })).toBeVisible();
+
+    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+    const serious = results.violations.filter((violation) => ["serious", "critical"].includes(violation.impact ?? ""));
+
+    expect(serious.map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target).join(" | ")}`)).toEqual([]);
+  });
+});
+
 test.describe("responsive layout", () => {
+  test("the open Export menu fits inside a 320px screen", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 800 });
+    await page.goto(`/briefs/${DOC_BRIEF}`);
+    await page.waitForTimeout(SETTLE_MS);
+    await page.getByRole("button", { name: "Export" }).first().click();
+
+    const menu = page.getByRole("menu", { name: "Export" });
+    await expect(menu).toBeVisible();
+    const box = await menu.boundingBox();
+    expect(box?.x).toBeGreaterThanOrEqual(0);
+    expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(320);
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
   for (const screen of SCREENS) {
     for (const width of WIDTHS) {
       test(`${screen.name} fits a ${width}px screen without sideways scrolling`, async ({ page }, testInfo) => {
