@@ -3,6 +3,7 @@
 import { BrickWall, Cable, Cloudy, Factory, Server, Waypoints, type LucideIcon } from "lucide-react";
 
 import type { DocCopy } from "@/lib/brief-doc-copy";
+import { SECTION_ID } from "@/lib/brief-sections";
 import type { DocReference, DocSnapshot } from "@/lib/brief-types";
 import { cn } from "@/lib/cn";
 import { tokenizeTech } from "@/lib/tech-terms";
@@ -56,7 +57,7 @@ export function EngineerSheet({ snapshot, references, labels, copy, wide = false
   const notFound = labels.not_found_public ?? "Not found in public sources.";
 
   return (
-    <Tile labelledBy={HEADING_ID} className={className}>
+    <Tile id={SECTION_ID.engineer} labelledBy={HEADING_ID} className={cn("scroll-mt-16", className)}>
       <p className="micro-label">{labels.technical_snapshot ?? "Technical snapshot"}</p>
       <h2 id={HEADING_ID} className="mt-2.5 text-xl font-semibold tracking-heading">
         {copy.forEngineer}

@@ -21,7 +21,7 @@ import { ApiError } from "@/lib/session";
 
 import { AmbientPanel } from "./ambient-panel";
 import { BriefActions } from "./brief-actions";
-import { BriefBody, BriefTop } from "./brief-layout";
+import { BriefBody, BriefNav, BriefTop, hasDocLayout } from "./brief-layout";
 import { BriefSkeleton } from "./brief-skeleton";
 import { PinnedBar } from "./pinned-bar";
 import { ProgressView } from "./progress-view";
@@ -149,12 +149,20 @@ export function BriefScreen({ id }: BriefScreenProps) {
       onUpdate={startUpdate}
       onDelete={() => setConfirmingDelete(true)}
       compact={compact}
+      // The document layout's jump nav shares the pinned bar, so Update moves into the menu sooner.
+      updateButtonFrom={hasDocLayout(data) ? "xl" : "md"}
     />
   );
 
   return (
     <>
-      <PinnedBar visible={pastHeader && !updating} company={data.company} score={data.score} actions={actions(true)} />
+      <PinnedBar
+        visible={pastHeader && !updating}
+        company={data.company}
+        score={data.score}
+        actions={actions(true)}
+        nav={<BriefNav brief={data} />}
+      />
 
       <m.article variants={stagger(0.06)} initial="hidden" animate="shown" className="page pb-24 pt-4 sm:pt-6">
         <BriefTop brief={data} reusedFrom={reusedFrom} actions={actions(false)} />

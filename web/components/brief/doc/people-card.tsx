@@ -3,6 +3,7 @@
 import { UserRound } from "lucide-react";
 
 import type { DocCopy } from "@/lib/brief-doc-copy";
+import { SECTION_ID } from "@/lib/brief-sections";
 import type { DocPerson, DocReference } from "@/lib/brief-types";
 import { cn } from "@/lib/cn";
 
@@ -35,7 +36,7 @@ function initials(name: string): string {
  */
 export function PeopleCard({ people, references, labels, copy }: PeopleCardProps) {
   return (
-    <Tile labelledBy={HEADING_ID}>
+    <Tile id={SECTION_ID.people} labelledBy={HEADING_ID} className="scroll-mt-16">
       <h2 id={HEADING_ID} className="text-xl font-semibold tracking-heading">
         {labels.who_to_talk_to ?? "Who to talk to"}
       </h2>

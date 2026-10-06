@@ -1,12 +1,20 @@
 // The few words the document layout needs that the API's label table does not
 // carry: use-case names, deal status, and the two audience headings. In the
 // brief's language, like the labels. English stands in for any other language.
+//
+// TODO: the API should own this wording. Its label table (i18n.LABELS in the
+// Brief API) already carries every other label in both languages; once these
+// keys are added there, this table goes and the page reads `labels` for all of it.
 
 import type { UseCase } from "./brief-types";
 
 export interface DocCopy {
   askThis: string;
   forEngineer: string;
+  /** The short name of the angles section in the jump nav. */
+  navWhyNow: string;
+  /** What the jump nav is called, for assistive technology. */
+  onThisPage: string;
   firstHand: string;
   dealPending: string;
   dealCompleted: string;
@@ -30,6 +38,8 @@ const COPY: Record<string, DocCopy> = {
   en: {
     askThis: "Ask this",
     forEngineer: "For the engineer",
+    navWhyNow: "Why now",
+    onThisPage: "On this page",
     firstHand: "First-hand",
     dealPending: "Pending deal",
     dealCompleted: "Deal completed",
@@ -53,6 +63,8 @@ const COPY: Record<string, DocCopy> = {
   es: {
     askThis: "Pregunte esto",
     forEngineer: "Para el ingeniero",
+    navWhyNow: "Por qué ahora",
+    onThisPage: "En esta página",
     firstHand: "Fuente directa",
     dealPending: "Operación pendiente",
     dealCompleted: "Operación completada",

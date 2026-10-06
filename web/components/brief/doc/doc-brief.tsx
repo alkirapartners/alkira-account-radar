@@ -4,6 +4,7 @@ import { m } from "motion/react";
 
 import { readableDate } from "@/lib/brief-doc";
 import { docCopy, fill, type DocCopy } from "@/lib/brief-doc-copy";
+import { SECTION_ID } from "@/lib/brief-sections";
 import type { BriefDetail, BriefDoc } from "@/lib/brief-types";
 import { rise, stagger } from "@/lib/motion";
 
@@ -30,7 +31,7 @@ interface SectionProps {
 /** The hero: every reason to call, each a full-width card, under the page's one large section heading. */
 function WhyNow({ doc, labels, language, copy }: SectionProps) {
   return (
-    <section aria-labelledby="why-now-heading" className="mt-12 sm:mt-16">
+    <section id={SECTION_ID.whyNow} aria-labelledby="why-now-heading" className="mt-12 scroll-mt-16 sm:mt-16">
       <m.h2
         variants={rise}
         id="why-now-heading"

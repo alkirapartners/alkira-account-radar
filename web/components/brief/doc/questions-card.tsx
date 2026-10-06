@@ -4,6 +4,7 @@ import { CornerDownRight, Ear } from "lucide-react";
 
 import { CopyButton } from "@/components/ui/copy-button";
 import { fill, nameOfUseCase, type DocCopy } from "@/lib/brief-doc-copy";
+import { SECTION_ID } from "@/lib/brief-sections";
 import type { DocAngle, DocQuestion } from "@/lib/brief-types";
 import { cn } from "@/lib/cn";
 
@@ -103,7 +104,7 @@ function Question({ item, number, angle, labels, language, copy }: QuestionProps
  */
 export function QuestionsCard({ questions, angles, labels, language, copy, className }: QuestionsCardProps) {
   return (
-    <Tile labelledBy={HEADING_ID} className={className}>
+    <Tile id={SECTION_ID.ask} labelledBy={HEADING_ID} className={cn("scroll-mt-16", className)}>
       <h2 id={HEADING_ID} className="text-xl font-semibold tracking-heading">
         {copy.askThis}
       </h2>

@@ -11,10 +11,12 @@ interface PinnedBarProps {
   company: string;
   score: number;
   actions: ReactNode;
+  /** Shown between the name and the actions on wide screens: the jump nav of a long brief. */
+  nav?: ReactNode;
 }
 
 /** The brief's name and actions, kept in reach once its header has scrolled away. */
-export function PinnedBar({ visible, company, score, actions }: PinnedBarProps) {
+export function PinnedBar({ visible, company, score, actions, nav }: PinnedBarProps) {
   return (
     <AnimatePresence>
       {visible ? (
@@ -29,6 +31,7 @@ export function PinnedBar({ visible, company, score, actions }: PinnedBarProps) 
               <span className="truncate font-semibold tracking-heading">{company}</span>
               <ScoreMeter score={score} scale={5} size="sm" className="hidden shrink-0 sm:inline-flex" />
             </p>
+            {nav}
             {actions}
           </div>
         </m.div>

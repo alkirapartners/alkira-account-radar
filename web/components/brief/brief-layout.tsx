@@ -5,11 +5,14 @@ import type { ReactNode } from "react";
 
 import { splitStats } from "@/lib/brief-content";
 import { hostOf, isWebAddress, readDoc } from "@/lib/brief-doc";
+import { docCopy } from "@/lib/brief-doc-copy";
+import { docSections } from "@/lib/brief-sections";
 import type { BriefDetail, DocCompany } from "@/lib/brief-types";
 
 import { BriefBento } from "./brief-bento";
 import { BriefHeader } from "./brief-header";
 import { DocBrief } from "./doc/doc-brief";
+import { SectionNav } from "./doc/section-nav";
 
 // The two layouts a brief can have. A response that carries a brief document
 // gets the document layout; a legacy markdown brief keeps the bento it always had.
@@ -101,4 +104,17 @@ export function BriefTop({ brief, reusedFrom, actions }: BriefTopProps) {
 export function BriefBody({ brief }: { brief: BriefDetail }) {
   const doc = readDoc(brief);
   return doc ? <DocBrief brief={brief} doc={doc} /> : <BriefBento brief={brief} />;
+}
+
+/** True when the brief gets the document layout, which is long enough to want its jump nav. */
+export function hasDocLayout(brief: BriefDetail): boolean {
+  return readDoc(brief) !== null;
+}
+
+/** The jump nav for the pinned bar. Nothing for a legacy brief. */
+export function BriefNav({ brief }: { brief: BriefDetail }) {
+  const doc = readDoc(brief);
+  if (!doc) return null;
+  const copy = docCopy(brief.language);
+  return <SectionNav sections={docSections(doc, brief.labels, copy)} label={copy.onThisPage} />;
 }

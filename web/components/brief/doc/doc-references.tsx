@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { Pill, type PillTone } from "@/components/ui/pill";
 import { displayUrl, isWebAddress, referenceDate, referenceTitle, sentenceCase } from "@/lib/brief-doc";
 import type { DocCopy } from "@/lib/brief-doc-copy";
+import { SECTION_ID } from "@/lib/brief-sections";
 import type { DocReference, SourceType } from "@/lib/brief-types";
 import { rise } from "@/lib/motion";
 
@@ -96,7 +97,7 @@ function ReferenceItem({ reference, labels, language, copy }: ReferenceItemProps
  */
 export function DocReferences({ references, labels, language, copy }: DocReferencesProps) {
   return (
-    <m.section variants={rise} aria-labelledby={HEADING_ID}>
+    <m.section variants={rise} id={SECTION_ID.references} aria-labelledby={HEADING_ID} className="scroll-mt-16">
       <h2 id={HEADING_ID} className="text-xl font-semibold tracking-heading">
         {labels.references ?? "References"}
       </h2>
