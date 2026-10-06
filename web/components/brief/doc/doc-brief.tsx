@@ -114,7 +114,10 @@ export function DocBrief({ brief, doc }: DocBriefProps) {
   const hasHonesty = doc.unconfirmed.length > 0 || doc.raiseScore.length > 0;
 
   return (
-    <m.div variants={stagger(0.04, 0.05)}>
+    // Everything here is free text written from other people's pages. `overflow-wrap` is inherited,
+    // so set once on the root it lets any of it (a long address, a token with no spaces) break
+    // inside its own box instead of pushing the page wider.
+    <m.div variants={stagger(0.04, 0.05)} className="[overflow-wrap:anywhere]">
       <VerdictPanel doc={doc} labels={labels} />
 
       {doc.angles.length > 0 ? <WhyNow {...section} /> : null}

@@ -292,6 +292,32 @@ describe("the document layout", () => {
     expect(within(rows[2]).getByText("Source undated")).toBeInTheDocument();
   });
 
+  it("gives a number used by two references to the first, so a chip has one place to land", () => {
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    const references = [DOC.references[0], { ...DOC.references[1], n: 1 }, DOC.references[2]];
+    renderWithProviders(<BriefBody brief={withDoc({ references })} />);
+
+    const rows = within(screen.getByRole("region", { name: "References" })).getAllByRole("listitem");
+    expect(rows).toHaveLength(3);
+    expect(rows.map((row) => row.id)).toEqual(["ref-1", "", "ref-3"]);
+    expect(document.querySelectorAll("#ref-1")).toHaveLength(1);
+    // Both rows are drawn, each with its own link, and React was given distinct keys.
+    expect(within(rows[1]).getByRole("link")).toHaveAttribute("href", "https://careers.harborfuels.example/job/network-engineer");
+    expect(errors.mock.calls.flat().join(" ")).not.toMatch(/same key/);
+    errors.mockRestore();
+  });
+
+  it("lets free text break anywhere, so a long unbroken string cannot widen the page", () => {
+    const token = "x".repeat(200);
+    const angles = [{ ...DOC.angles[0], title: token, evidence: [{ text: token, date: "", sources: [] }] }];
+    const { container } = renderWithProviders(<BriefBody brief={withDoc({ angles })} />);
+
+    // The rule is inherited from the layout's root, so it reaches every piece of text in it.
+    expect(container.firstElementChild).toHaveClass("[overflow-wrap:anywhere]");
+    expect(container.firstElementChild).toContainElement(screen.getByRole("heading", { name: token }));
+    expect(screen.getAllByText(token).every((node) => !node.className.includes("whitespace-nowrap"))).toBe(true);
+  });
+
   it("never links a reference whose address is not a web address", () => {
     const references = [{ ...DOC.references[0], url: "javascript:alert(1)" }];
     renderWithProviders(<BriefBody brief={withDoc({ references })} />);

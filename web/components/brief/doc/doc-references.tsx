@@ -55,14 +55,21 @@ function ReferenceRow({ url, newTab, children }: { url: string; newTab: string; 
   );
 }
 
-type ReferenceItemProps = Omit<DocReferencesProps, "references"> & { reference: DocReference };
+type ReferenceItemProps = Omit<DocReferencesProps, "references"> & {
+  reference: DocReference;
+  /** False for a later reference that repeats a number: the first one keeps the anchor that chips jump to. */
+  isAnchor: boolean;
+};
 
 /** One source: its number, title and address, then how close it is to the company and how it is dated. */
-function ReferenceItem({ reference, labels, language, copy }: ReferenceItemProps) {
+function ReferenceItem({ reference, isAnchor, labels, language, copy }: ReferenceItemProps) {
   const type = reference.sourceType;
 
   return (
-    <li id={referenceAnchor(reference.n)} className="scroll-mt-16 border-b border-line [&:target>*]:bg-accent/[0.08]">
+    <li
+      id={isAnchor ? referenceAnchor(reference.n) : undefined}
+      className="scroll-mt-16 border-b border-line [&:target>*]:bg-accent/[0.08]"
+    >
       <ReferenceRow url={reference.url} newTab={copy.newTab}>
         <span className="num w-6 shrink-0 pt-px text-xs leading-5 text-ink-2">{String(reference.n).padStart(2, "0")}</span>
         <span className="flex min-w-0 flex-1 flex-col gap-2.5 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
@@ -102,8 +109,16 @@ export function DocReferences({ references, labels, language, copy }: DocReferen
       </h2>
 
       <ol className="mt-4 border-t border-line">
-        {references.map((reference) => (
-          <ReferenceItem key={reference.n} reference={reference} labels={labels} language={language} copy={copy} />
+        {references.map((reference, index) => (
+          <ReferenceItem
+            // Numbers come from the document and can repeat, so the position is part of the key.
+            key={`${index}:${reference.n}`}
+            reference={reference}
+            isAnchor={references.findIndex((other) => other.n === reference.n) === index}
+            labels={labels}
+            language={language}
+            copy={copy}
+          />
         ))}
       </ol>
     </m.section>
