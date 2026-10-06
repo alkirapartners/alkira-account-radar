@@ -6,7 +6,6 @@ import {
   evidenceColumns,
   evidenceDate,
   isProofPoint,
-  readDoc,
   readableDate,
   referenceDate,
   referenceTitle,
@@ -16,28 +15,9 @@ import {
   splitMetric,
 } from "@/lib/brief-doc";
 import { docCopy, nameOfUseCase } from "@/lib/brief-doc-copy";
-import type { BriefDetail, BriefDoc } from "@/lib/brief-types";
 import { tokenizeTech } from "@/lib/tech-terms";
 
-import { DOC, DOC_BRIEF, DOC_LABELS_EN } from "../doc-fixture";
-import { RICH_BRIEF } from "../fixtures";
-
-describe("readDoc", () => {
-  it("returns the document a response carries", () => {
-    expect(readDoc(DOC_BRIEF)).toBe(DOC);
-  });
-
-  it("returns nothing for a legacy response, with or without the field", () => {
-    expect(readDoc(RICH_BRIEF)).toBeNull();
-    expect(readDoc({ ...RICH_BRIEF, format: 1, doc: null })).toBeNull();
-  });
-
-  it("returns nothing for a document that is missing a section, so the page falls back", () => {
-    const broken = { ...DOC, angles: undefined } as unknown as BriefDoc;
-    expect(readDoc({ ...DOC_BRIEF, doc: broken })).toBeNull();
-    expect(readDoc({ ...DOC_BRIEF, doc: "{}" } as unknown as BriefDetail)).toBeNull();
-  });
-});
+import { DOC, DOC_LABELS_EN } from "../doc-fixture";
 
 describe("readableDate", () => {
   it("writes a stored date the way people do, to the precision it has", () => {

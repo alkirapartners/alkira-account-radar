@@ -66,7 +66,7 @@ export function EngineerSheet({ snapshot, references, labels, copy, wide = false
       <dl className={cn("mt-5 border-t border-line", wide ? "sm:grid sm:grid-cols-2 sm:gap-x-10" : "divide-y divide-line")}>
         {ROWS.map((row) => {
           const line = snapshot[row.key];
-          const text = line?.text.trim() ?? "";
+          const text = line.text.trim();
           const isFound = text !== "";
           return (
             // A description list may hold only terms and descriptions, so the icon lives inside the

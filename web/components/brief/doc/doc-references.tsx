@@ -59,8 +59,7 @@ type ReferenceItemProps = Omit<DocReferencesProps, "references"> & { reference: 
 
 /** One source: its number, title and address, then how close it is to the company and how it is dated. */
 function ReferenceItem({ reference, labels, language, copy }: ReferenceItemProps) {
-  // A type this page does not know is shown as second-hand, the API's own default for an untyped source.
-  const type: SourceType = TYPE_TONE[reference.sourceType] ? reference.sourceType : "second_hand";
+  const type = reference.sourceType;
 
   return (
     <li id={referenceAnchor(reference.n)} className="scroll-mt-16 border-b border-line [&:target>*]:bg-accent/[0.08]">

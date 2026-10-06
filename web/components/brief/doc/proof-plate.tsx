@@ -1,4 +1,4 @@
-import { emphasiseNumbers, isProofPoint, splitCustomer, splitMetric } from "@/lib/brief-doc";
+import { emphasiseNumbers, hasProof, isProofPoint, splitCustomer, splitMetric } from "@/lib/brief-doc";
 import type { DocStory } from "@/lib/brief-types";
 import { cn } from "@/lib/cn";
 
@@ -92,7 +92,7 @@ function MetricPlate({ story, label, note, className }: { story: DocStory; label
 
 /** What Alkira has done for someone else: the most prominent thing in an angle card. */
 export function ProofPlate({ story, labels, noStoryNote, className }: ProofPlateProps) {
-  if (!story.customer.trim() && !story.result.trim()) return null;
+  if (!hasProof(story)) return null;
 
   const isFigure = isProofPoint(story);
   if (isFigure || !story.customer.trim()) {

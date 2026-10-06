@@ -86,9 +86,8 @@ function AskAndSnapshot({ doc, labels, language, copy }: SectionProps) {
 
 /** How much research stands behind the brief and when it was written, then the confidentiality mark. */
 function Colophon({ doc, labels, language, copy }: SectionProps) {
-  const generated = readableDate(doc.generated ?? "", language);
-  // Added by the API after the writer's output; an early document may not carry it.
-  const research = doc.research as BriefDoc["research"] | undefined;
+  const generated = readableDate(doc.generated, language);
+  const { research } = doc;
 
   return (
     <m.footer variants={rise} className="mt-8 flex flex-col items-center gap-3 text-center">

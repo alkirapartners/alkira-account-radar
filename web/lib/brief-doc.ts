@@ -1,26 +1,8 @@
-// Readers for a brief document (format 2). Pure functions: no React, and no
-// wording of their own beyond what the API's label table supplies.
+// Helpers for laying out a brief document (format 2): dates, proof, references.
+// Pure functions: no React, and no wording of their own beyond what the API's
+// label table supplies. The document itself is read in read-brief-doc.ts.
 
-import type { BriefDetail, BriefDoc, DocEvidenceLine, DocReference, DocStory } from "./brief-types";
-
-const DOC_FORMAT = 2;
-const OBJECT_PARTS = ["company", "stats", "fit", "snapshot"] as const;
-const LIST_PARTS = ["angles", "people", "questions", "unconfirmed", "raiseScore", "references"] as const;
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-/**
- * The document a response carries, or null when it has none or one this page
- * cannot lay out. The page then shows the legacy fields, which every response has.
- */
-export function readDoc(brief: BriefDetail): BriefDoc | null {
-  const doc: unknown = brief.doc;
-  if (!isRecord(doc) || doc.format !== DOC_FORMAT) return null;
-  const isWhole = OBJECT_PARTS.every((part) => isRecord(doc[part])) && LIST_PARTS.every((part) => Array.isArray(doc[part]));
-  return isWhole ? (doc as unknown as BriefDoc) : null;
-}
+import type { DocEvidenceLine, DocReference, DocStory } from "./brief-types";
 
 // ── Dates ────────────────────────────────────────────────────────────────────
 
@@ -107,6 +89,11 @@ const METRIC_STORY_ID = "metric";
 /** True for a figure standing in where no customer story fits the angle. */
 export function isProofPoint(story: DocStory): boolean {
   return story.id === METRIC_STORY_ID;
+}
+
+/** True when an angle has anything to show as proof: a customer, a result, or both. */
+export function hasProof(story: DocStory): boolean {
+  return story.customer.trim() !== "" || story.result.trim() !== "";
 }
 
 const NAME_SEPARATOR = ": ";

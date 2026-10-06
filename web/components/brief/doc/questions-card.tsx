@@ -42,7 +42,7 @@ function AngleTag({ angle, number, language, copy }: { angle: DocAngle; number: 
       )}
     >
       <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-      {nameOfUseCase(angle.useCase, language)}
+      {nameOfUseCase(angle.useCase, language) || fill(copy.angle, { n: number })}
     </a>
   );
 }

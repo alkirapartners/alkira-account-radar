@@ -16,9 +16,10 @@ import {
 import { m } from "motion/react";
 
 import { Pill } from "@/components/ui/pill";
-import { readableDate } from "@/lib/brief-doc";
+import { hasProof, readableDate } from "@/lib/brief-doc";
 import { fill, nameOfUseCase, type DocCopy } from "@/lib/brief-doc-copy";
 import type { DocAngle, DocReference } from "@/lib/brief-types";
+import { cn } from "@/lib/cn";
 import { rise } from "@/lib/motion";
 
 import { EvidenceList } from "./evidence-list";
@@ -62,8 +63,7 @@ function hasDeal(angle: DocAngle): boolean {
 
 /** Pending or completed, with the deal's date: what makes an M&A angle time-sensitive. */
 function DealStatus({ angle, language, copy }: AngleParts) {
-  // The deal fields were added after the first documents. The API fills them in, but a missing one must not break the page.
-  const date = readableDate(angle.dealDate ?? "", language);
+  const date = readableDate(angle.dealDate, language);
 
   if (angle.dealStatus === "pending") {
     return (
@@ -90,8 +90,9 @@ function DealStatus({ angle, language, copy }: AngleParts) {
 /** The angle's number and use case, its title, and for a pending deal the source's own words on timing. */
 function AngleHeading({ angle, number, headingId, language, copy }: AngleParts & { number: number; headingId: string }) {
   const UseCaseIcon = iconOfUseCase(angle.useCase);
+  const useCase = nameOfUseCase(angle.useCase, language);
   const isDeal = hasDeal(angle);
-  const pendingQuote = (angle.dealPendingQuote ?? "").trim();
+  const pendingQuote = angle.dealPendingQuote.trim();
 
   return (
     <>
@@ -99,15 +100,18 @@ function AngleHeading({ angle, number, headingId, language, copy }: AngleParts &
         <span className="num flex h-6 items-center rounded-full bg-ink px-2.5 text-xs font-medium text-white">
           {String(number).padStart(2, "0")}
         </span>
-        <Pill tone={isDeal ? "surface" : "neutral"}>
-          <UseCaseIcon className="h-3.5 w-3.5" aria-hidden="true" />
-          {nameOfUseCase(angle.useCase, language)}
-        </Pill>
+        {useCase ? (
+          <Pill tone={isDeal ? "surface" : "neutral"}>
+            <UseCaseIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            {useCase}
+          </Pill>
+        ) : null}
         {isDeal ? <DealStatus angle={angle} language={language} copy={copy} /> : null}
       </p>
 
       <h3 id={headingId} className="mt-4 text-xl font-semibold leading-snug tracking-heading sm:text-[22px]">
-        {angle.title}
+        {/* A card is never left without a name: its number stands in for a missing title. */}
+        {angle.title.trim() || fill(copy.angle, { n: number })}
       </h3>
 
       {pendingQuote ? (
@@ -149,7 +153,7 @@ export function AngleCard({ angle, number, references, labels, language, copy }:
         />
       ) : null}
 
-      <div className="p-4 sm:p-5 lg:p-6">
+      <div className={cn("p-4 sm:p-5 lg:p-6", !hasProof(angle.story) && "lg:col-span-2")}>
         <AngleHeading angle={angle} number={number} headingId={headingId} language={language} copy={copy} />
         {answer ? (
           <>

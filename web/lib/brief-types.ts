@@ -186,7 +186,8 @@ export interface BriefDoc {
   /** The day the brief was generated, YYYY-MM-DD. */
   generated: string;
   references: DocReference[];
-  research: DocResearch;
+  /** Null when the document carries no research note. */
+  research: DocResearch | null;
 }
 
 export type BriefStreamEvent =
