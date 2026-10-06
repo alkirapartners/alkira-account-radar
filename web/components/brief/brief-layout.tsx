@@ -3,8 +3,8 @@
 import { ArrowUpRight } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { hostOf, isWebAddress, readDoc } from "@/lib/brief-doc";
 import { splitStats } from "@/lib/brief-content";
+import { hostOf, isWebAddress, readDoc } from "@/lib/brief-doc";
 import type { BriefDetail, DocCompany } from "@/lib/brief-types";
 
 import { BriefBento } from "./brief-bento";
@@ -21,34 +21,36 @@ interface BriefTopProps {
   actions: ReactNode;
 }
 
+/** The company's own site, opened in a new tab. Its ::after pad brings the touch target to 44px. */
+function SiteLink({ href, host }: { href: string; host: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group relative inline-flex items-center gap-0.5 underline decoration-ink/20 underline-offset-[3px] transition-colors duration-fast after:absolute after:-inset-x-1 after:-inset-y-3 after:content-[''] hover:text-accent hover:decoration-accent"
+    >
+      {host}
+      <ArrowUpRight
+        className="h-3.5 w-3.5 transition-transform duration-fast ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+        aria-hidden="true"
+      />
+    </a>
+  );
+}
+
 /** Which company the brief resolved: its legal entity, how it is owned, its site, and a note when names collide. */
 function Identity({ company, name, ownership, label }: { company: DocCompany; name: string; ownership: string; label: string }) {
   const legalName = company.legalName.trim();
   const website = company.website.trim();
   const host = isWebAddress(website) ? hostOf(website) : "";
   const note = company.identityNote.trim();
+  // The legal name is left out when it only repeats the heading above it.
+  const isSameName = legalName.toLowerCase() === name.trim().toLowerCase();
   const facts: ReactNode[] = [
-    legalName && legalName.toLowerCase() !== name.trim().toLowerCase() ? (
-      <span key="entity" className="font-medium text-ink">
-        {legalName}
-      </span>
-    ) : null,
-    ownership ? <span key="ownership">{ownership}</span> : null,
-    host ? (
-      <a
-        key="site"
-        href={website}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group relative inline-flex items-center gap-0.5 underline decoration-ink/20 underline-offset-[3px] transition-colors duration-fast after:absolute after:-inset-x-1 after:-inset-y-3 after:content-[''] hover:text-accent hover:decoration-accent"
-      >
-        {host}
-        <ArrowUpRight
-          className="h-3.5 w-3.5 transition-transform duration-fast ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-          aria-hidden="true"
-        />
-      </a>
-    ) : null,
+    legalName && !isSameName ? <span className="font-medium text-ink">{legalName}</span> : null,
+    ownership ? <span>{ownership}</span> : null,
+    host ? <SiteLink href={website} host={host} /> : null,
   ].filter(Boolean);
 
   if (facts.length === 0 && !note) return null;

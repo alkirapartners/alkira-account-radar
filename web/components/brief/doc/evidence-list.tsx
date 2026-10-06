@@ -26,23 +26,28 @@ const DOT: Record<DateKind, string> = {
  * is dated and the sources it rests on, so "why now" can be read down the rail.
  */
 export function EvidenceList({ evidence, references, labels, language, sourceLabel }: EvidenceListProps) {
+  if (evidence.length === 0) return null;
+
   return (
-    <ol>
-      {evidence.map((line, index) => {
-        const state = evidenceDate(line, references, language);
-        const isLast = index === evidence.length - 1;
-        return (
-          <li key={index} className={cn("relative pl-6", !isLast && "pb-5")}>
-            {isLast ? null : <span aria-hidden="true" className="absolute bottom-0 left-[4.5px] top-4 w-px bg-line-strong" />}
-            <span aria-hidden="true" className={cn("absolute left-0 top-[5px] h-2.5 w-2.5 rounded-full", DOT[state.kind])} />
-            <p className="flex min-h-[22px] flex-wrap items-center gap-x-2.5 gap-y-1.5">
-              <DateStamp state={state} labels={labels} icon={false} />
-              <SourceChips sources={line.sources} references={references} label={sourceLabel} />
-            </p>
-            <p className="mt-1.5 text-[15px] leading-relaxed text-ink">{line.text}</p>
-          </li>
-        );
-      })}
-    </ol>
+    <>
+      <h4 className="micro-label mt-6">{labels.evidence ?? "Evidence"}</h4>
+      <ol className="mt-4">
+        {evidence.map((line, index) => {
+          const state = evidenceDate(line, references, language);
+          const isLast = index === evidence.length - 1;
+          return (
+            <li key={index} className={cn("relative pl-6", !isLast && "pb-5")}>
+              {isLast ? null : <span aria-hidden="true" className="absolute bottom-0 left-[4.5px] top-4 w-px bg-line-strong" />}
+              <span aria-hidden="true" className={cn("absolute left-0 top-[5px] h-2.5 w-2.5 rounded-full", DOT[state.kind])} />
+              <p className="flex min-h-[22px] flex-wrap items-center gap-x-2.5 gap-y-1.5">
+                <DateStamp state={state} labels={labels} icon={false} />
+                <SourceChips sources={line.sources} references={references} label={sourceLabel} />
+              </p>
+              <p className="mt-1.5 text-[15px] leading-relaxed text-ink">{line.text}</p>
+            </li>
+          );
+        })}
+      </ol>
+    </>
   );
 }

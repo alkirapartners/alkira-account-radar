@@ -13,7 +13,7 @@ import {
   splitLead,
   splitMetric,
 } from "@/lib/brief-doc";
-import { docCopy, useCaseLabel } from "@/lib/brief-doc-copy";
+import { docCopy, nameOfUseCase } from "@/lib/brief-doc-copy";
 import type { BriefDetail, BriefDoc } from "@/lib/brief-types";
 import { tokenizeTech } from "@/lib/tech-terms";
 
@@ -153,10 +153,10 @@ describe("splitLead", () => {
 
 describe("copy", () => {
   it("names each use case in the brief's language", () => {
-    expect(useCaseLabel("m_and_a", "en")).toBe("M&A");
-    expect(useCaseLabel("multi_cloud", "es")).toBe("Multinube");
+    expect(nameOfUseCase("m_and_a", "en")).toBe("M&A");
+    expect(nameOfUseCase("multi_cloud", "es")).toBe("Multinube");
     // A use case this page does not know yet still reads as words.
-    expect(useCaseLabel("edge_compute", "en")).toBe("Edge compute");
+    expect(nameOfUseCase("edge_compute", "en")).toBe("Edge compute");
   });
 
   it("falls back to English for a language it has no copy for", () => {

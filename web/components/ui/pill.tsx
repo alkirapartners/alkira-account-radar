@@ -2,10 +2,12 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/cn";
 
-export type PillTone = "neutral" | "accent" | "positive" | "warning" | "negative" | "ambient";
+export type PillTone = "neutral" | "surface" | "accent" | "positive" | "warning" | "negative" | "ambient";
 
 const TONES: Record<PillTone, string> = {
   neutral: "bg-sunken text-ink-2",
+  // For a pill that sits on a tinted area, where the sunken grey would look muddy.
+  surface: "bg-surface text-ink-2 shadow-[inset_0_0_0_1px_rgb(var(--ink-rgb)/0.07)]",
   accent: "bg-accent/10 text-accent",
   positive: "bg-positive-tint text-positive",
   warning: "bg-warning-tint text-warning",

@@ -85,7 +85,7 @@ export function fill(template: string, values: Record<string, string | number>):
 }
 
 /** A use case's name. One this page does not know yet is shown as plain words. */
-export function useCaseLabel(useCase: string, language: string): string {
+export function nameOfUseCase(useCase: string, language: string): string {
   const known = docCopy(language).useCases[useCase as UseCase];
   if (known) return known;
   const words = useCase.replace(/_/g, " ").trim();

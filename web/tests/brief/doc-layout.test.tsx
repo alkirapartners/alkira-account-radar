@@ -178,6 +178,33 @@ describe("the document layout", () => {
     expect(within(list).getByText("Harbor Fuels press release: separation of Lubricants")).toBeInTheDocument();
   });
 
+  it("speaks the brief's language, in the labels the API sends and in its own few words", () => {
+    const labels = {
+      ...DOC_BRIEF.labels,
+      why_now: "Por qué esta cuenta, por qué ahora",
+      undated: "fuente sin fecha",
+      open_posting_seen: "vacante abierta, vista el {date}",
+    };
+    renderWithProviders(<BriefBody brief={{ ...DOC_BRIEF, language: "es", labels }} />);
+
+    expect(screen.getByRole("heading", { name: "Por qué esta cuenta, por qué ahora" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Pregunte esto" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Para el ingeniero" })).toBeInTheDocument();
+    const deal = screen.getByRole("article", { name: "Lubricants separation needs its own network" });
+    expect(within(deal).getByText("Fusiones y adquisiciones")).toBeInTheDocument();
+    expect(within(deal).getByText("Vacante abierta, vista el 6 oct 2026")).toBeInTheDocument();
+    expect(within(deal).getByText(/anunciada el 28 jul 2026/)).toBeInTheDocument();
+  });
+
+  it("still renders a document from before the deal fields existed", () => {
+    const early = DOC.angles.map(({ dealDate: _date, dealStatus: _status, dealPendingQuote: _quote, ...angle }) => angle);
+    renderWithProviders(<BriefBody brief={withDoc({ angles: early as unknown as BriefDoc["angles"] })} />);
+
+    const deal = screen.getByRole("article", { name: "Lubricants separation needs its own network" });
+    expect(within(deal).getByText("M&A")).toBeInTheDocument();
+    expect(within(deal).queryByText(/Pending deal/)).toBeNull();
+  });
+
   it("closes up around the sections a document leaves empty", () => {
     renderWithProviders(
       <BriefBody brief={withDoc({ angles: [], people: [], questions: [], unconfirmed: [], raiseScore: [], references: [] })} />,
