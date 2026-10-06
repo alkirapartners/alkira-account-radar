@@ -1,0 +1,178 @@
+"use client";
+
+import {
+  BrickWall,
+  CircleCheck,
+  Cloudy,
+  Globe,
+  Handshake,
+  Hourglass,
+  Merge,
+  Network,
+  Store,
+  Waypoints,
+  type LucideIcon,
+} from "lucide-react";
+import { m } from "motion/react";
+
+import { Pill } from "@/components/ui/pill";
+import { hasProof, readableDate } from "@/lib/brief-doc";
+import { fill, nameOfUseCase, type DocCopy } from "@/lib/brief-doc-copy";
+import type { DocAngle, DocReference } from "@/lib/brief-types";
+import { cn } from "@/lib/cn";
+import { rise } from "@/lib/motion";
+
+import { EvidenceList } from "./evidence-list";
+import { ProofPlate } from "./proof-plate";
+
+interface AngleCardProps {
+  angle: DocAngle;
+  /** Counting from 1, as questions refer to it. */
+  number: number;
+  references: readonly DocReference[];
+  labels: Record<string, string>;
+  language: string;
+  copy: DocCopy;
+}
+
+type AngleParts = Pick<AngleCardProps, "angle" | "language" | "copy">;
+
+const USE_CASE_ICON: Record<string, LucideIcon> = {
+  m_and_a: Merge,
+  multi_cloud: Cloudy,
+  china_global: Globe,
+  firewall_consolidation: BrickWall,
+  network_modernization: Waypoints,
+  site_rollout: Store,
+  partner_connectivity: Handshake,
+};
+
+export function iconOfUseCase(useCase: string): LucideIcon {
+  return USE_CASE_ICON[useCase] ?? Network;
+}
+
+/** The anchor a question's angle tag jumps to. */
+export function angleAnchor(number: number): string {
+  return `angle-${number}`;
+}
+
+/** True for an M&A angle that carries its deal: the angle with a clock on it. */
+function hasDeal(angle: DocAngle): boolean {
+  return angle.dealStatus === "pending" || angle.dealStatus === "completed";
+}
+
+/** Pending or completed, with the deal's date: what makes an M&A angle time-sensitive. */
+function DealStatus({ angle, language, copy }: AngleParts) {
+  const date = readableDate(angle.dealDate, language);
+
+  if (angle.dealStatus === "pending") {
+    return (
+      <>
+        <Pill tone="warning">
+          <Hourglass className="h-3.5 w-3.5" aria-hidden="true" />
+          {copy.dealPending}
+        </Pill>
+        {date ? <span className="text-xs font-medium text-warning">{fill(copy.announced, { date })}</span> : null}
+      </>
+    );
+  }
+  return (
+    <>
+      <Pill tone="accent">
+        <CircleCheck className="h-3.5 w-3.5" aria-hidden="true" />
+        {copy.dealCompleted}
+      </Pill>
+      {date ? <span className="text-xs font-medium text-accent">{date}</span> : null}
+    </>
+  );
+}
+
+/** The angle's number and use case, its title, and for a pending deal the source's own words on timing. */
+function AngleHeading({ angle, number, headingId, language, copy }: AngleParts & { number: number; headingId: string }) {
+  const UseCaseIcon = iconOfUseCase(angle.useCase);
+  const useCase = nameOfUseCase(angle.useCase, language);
+  const isDeal = hasDeal(angle);
+  const pendingQuote = angle.dealPendingQuote.trim();
+
+  return (
+    <>
+      <p className="flex flex-wrap items-center gap-x-2.5 gap-y-2">
+        <span className="num flex h-6 items-center rounded-full bg-ink px-2.5 text-xs font-medium text-white">
+          {String(number).padStart(2, "0")}
+        </span>
+        {useCase ? (
+          <Pill tone={isDeal ? "surface" : "neutral"}>
+            <UseCaseIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            {useCase}
+          </Pill>
+        ) : null}
+        {isDeal ? <DealStatus angle={angle} language={language} copy={copy} /> : null}
+      </p>
+
+      <h3 id={headingId} className="mt-4 text-xl font-semibold leading-snug tracking-heading sm:text-[22px]">
+        {/* A card is never left without a name: its number stands in for a missing title. */}
+        {angle.title.trim() || fill(copy.angle, { n: number })}
+      </h3>
+
+      {pendingQuote ? (
+        <blockquote className="mt-3 border-l-2 border-warning-fill pl-3 text-sm leading-relaxed text-ink-2">
+          &ldquo;{pendingQuote}&rdquo;
+        </blockquote>
+      ) : null}
+    </>
+  );
+}
+
+/**
+ * One reason to call, and the proof that Alkira has done it before.
+ *
+ * On a wide screen the card has two bands. The first is the pitch: the angle
+ * and what Alkira does about it on the left, the proof on the right, so the
+ * three are read together. The second is the evidence, run across the whole
+ * card in columns. An angle with four facts and one with a single fact both
+ * fill their card, and nothing is stretched or left hollow to match the other.
+ * On a narrow screen the parts stack in the same order.
+ */
+export function AngleCard({ angle, number, references, labels, language, copy }: AngleCardProps) {
+  const headingId = `${angleAnchor(number)}-heading`;
+  const answer = angle.alkira.trim();
+
+  return (
+    <m.article
+      variants={rise}
+      id={angleAnchor(number)}
+      aria-labelledby={headingId}
+      className="card relative isolate scroll-mt-16 p-2 lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-x-2"
+    >
+      {hasDeal(angle) ? (
+        // A warm wash in the corner marks the angle that has a clock on it.
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-44 rounded-t-card"
+          style={{ background: "radial-gradient(85% 100% at 0% 0%, rgb(var(--warning-tint-rgb) / 0.95), transparent 72%)" }}
+        />
+      ) : null}
+
+      <div className={cn("p-4 sm:p-5 lg:p-6", !hasProof(angle.story) && "lg:col-span-2")}>
+        <AngleHeading angle={angle} number={number} headingId={headingId} language={language} copy={copy} />
+        {answer ? (
+          <>
+            <h4 className="micro-label mt-6 text-accent">{labels.alkira_answer ?? "What Alkira does"}</h4>
+            <p className="mt-2.5 max-w-[64ch] text-[15px] leading-relaxed text-ink">{answer}</p>
+          </>
+        ) : null}
+      </div>
+
+      <ProofPlate story={angle.story} labels={labels} noStoryNote={copy.noStory} />
+
+      <EvidenceList
+        evidence={angle.evidence}
+        references={references}
+        labels={labels}
+        language={language}
+        sourceLabel={copy.source}
+        className="mt-2 border-t border-line p-4 sm:p-5 lg:col-span-2 lg:p-6"
+      />
+    </m.article>
+  );
+}

@@ -15,9 +15,27 @@ interface BriefActionsProps {
   onDelete: () => void;
   /** Icon-sized controls for the pinned bar. */
   compact?: boolean;
+  /**
+   * The screen width from which the compact Update button shows; below it,
+   * Update is in the menu. "xl" leaves room in the pinned bar for a jump nav.
+   */
+  updateButtonFrom?: UpdateBreakpoint;
 }
 
-export function BriefActions({ briefId, disabled, onUpdate, onDelete, compact = false }: BriefActionsProps) {
+type UpdateBreakpoint = "md" | "xl";
+
+/** Whole class names per breakpoint, so the stylesheet contains each of them. */
+const UPDATE_BUTTON: Record<UpdateBreakpoint, string> = { md: "hidden md:inline-flex", xl: "hidden xl:inline-flex" };
+const UPDATE_MENU_ITEM: Record<UpdateBreakpoint, string> = { md: "md:hidden", xl: "xl:hidden" };
+
+export function BriefActions({
+  briefId,
+  disabled,
+  onUpdate,
+  onDelete,
+  compact = false,
+  updateButtonFrom = "md",
+}: BriefActionsProps) {
   const size = compact ? "sm" : "md";
   const iconSize = compact ? "icon-sm" : "icon";
 
@@ -33,7 +51,7 @@ export function BriefActions({ briefId, disabled, onUpdate, onDelete, compact = 
         <Download className="h-4 w-4" aria-hidden="true" />
         Download PDF
       </a>
-      <Button variant="secondary" size={size} onClick={onUpdate} disabled={disabled} className={compact ? "hidden md:inline-flex" : "flex-1 sm:flex-none"}>
+      <Button variant="secondary" size={size} onClick={onUpdate} disabled={disabled} className={compact ? UPDATE_BUTTON[updateButtonFrom] : "flex-1 sm:flex-none"}>
         <RefreshCw className="h-4 w-4" aria-hidden="true" />
         Update brief
       </Button>
@@ -54,7 +72,10 @@ export function BriefActions({ briefId, disabled, onUpdate, onDelete, compact = 
             {compact ? (
               <Menu.Item
                 onSelect={onUpdate}
-                className="flex h-11 cursor-pointer select-none items-center gap-3 rounded-[10px] px-3 text-sm text-ink outline-none transition-colors duration-fast data-[highlighted]:bg-ink/5 md:hidden"
+                className={cn(
+                  "flex h-11 cursor-pointer select-none items-center gap-3 rounded-[10px] px-3 text-sm text-ink outline-none transition-colors duration-fast data-[highlighted]:bg-ink/5",
+                  UPDATE_MENU_ITEM[updateButtonFrom],
+                )}
               >
                 <RefreshCw className="h-4 w-4 text-ink-2" aria-hidden="true" />
                 Update brief

@@ -21,8 +21,7 @@ import { ApiError } from "@/lib/session";
 
 import { AmbientPanel } from "./ambient-panel";
 import { BriefActions } from "./brief-actions";
-import { BriefBento } from "./brief-bento";
-import { BriefHeader } from "./brief-header";
+import { BriefBody, BriefNav, BriefTop, hasDocLayout, useLayoutFailure } from "./brief-layout";
 import { BriefSkeleton } from "./brief-skeleton";
 import { PinnedBar } from "./pinned-bar";
 import { ProgressView } from "./progress-view";
@@ -47,6 +46,8 @@ export function BriefScreen({ id }: BriefScreenProps) {
   const [headerEnd, pastHeader] = useScrolledPast<HTMLDivElement>("-72px 0px 0px 0px");
 
   const brief = useQuery({ queryKey: ["brief", id], queryFn: () => getBrief(id) });
+  // If the document layout cannot be drawn, the whole page is drawn from the legacy fields instead.
+  const [layoutFailed, onLayoutError] = useLayoutFailure(id);
 
   const reusedParam = params.get("reused") ?? "";
   const reusedFrom = ISO_DATE.test(reusedParam) ? reusedParam : null;
@@ -150,15 +151,29 @@ export function BriefScreen({ id }: BriefScreenProps) {
       onUpdate={startUpdate}
       onDelete={() => setConfirmingDelete(true)}
       compact={compact}
+      // The document layout's jump nav shares the pinned bar, so Update moves into the menu sooner.
+      updateButtonFrom={hasDocLayout(data) && !layoutFailed ? "xl" : "md"}
     />
   );
 
   return (
     <>
-      <PinnedBar visible={pastHeader && !updating} company={data.company} score={data.score} actions={actions(true)} />
+      <PinnedBar
+        visible={pastHeader && !updating}
+        company={data.company}
+        score={data.score}
+        actions={actions(true)}
+        nav={<BriefNav brief={data} forceLegacy={layoutFailed} onLayoutError={onLayoutError} />}
+      />
 
       <m.article variants={stagger(0.06)} initial="hidden" animate="shown" className="page pb-24 pt-4 sm:pt-6">
-        <BriefHeader brief={data} reusedFrom={reusedFrom} actions={actions(false)} />
+        <BriefTop
+          brief={data}
+          reusedFrom={reusedFrom}
+          actions={actions(false)}
+          forceLegacy={layoutFailed}
+          onLayoutError={onLayoutError}
+        />
         <div ref={headerEnd} aria-hidden="true" className="h-px" />
 
         {update.state.status === "error" ? (
@@ -187,7 +202,7 @@ export function BriefScreen({ id }: BriefScreenProps) {
               </AmbientPanel>
             </m.div>
           ) : (
-            <BriefBento brief={data} />
+            <BriefBody brief={data} forceLegacy={layoutFailed} onLayoutError={onLayoutError} />
           )}
         </div>
       </m.article>

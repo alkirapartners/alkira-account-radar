@@ -6,7 +6,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { Pill } from "@/components/ui/pill";
-import { splitStats } from "@/lib/brief-content";
+import { splitStats, type Stat } from "@/lib/brief-content";
 import type { BriefDetail } from "@/lib/brief-types";
 import { rise } from "@/lib/motion";
 import { exactTime, relativeTime } from "@/lib/relative-time";
@@ -16,6 +16,10 @@ interface BriefHeaderProps {
   /** The date (YYYY-MM-DD) of the research this brief reused, if it did. */
   reusedFrom: string | null;
   actions: ReactNode;
+  /** Shown under the company name: which company the brief resolved. */
+  identity?: ReactNode;
+  /** The stat pills, when they are not simply the brief's stats line. */
+  stats?: Stat[];
 }
 
 const REUSED_FORMAT = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
@@ -25,8 +29,8 @@ export function formatReusedDate(isoDate: string): string {
   return Number.isNaN(date.getTime()) ? "" : REUSED_FORMAT.format(date);
 }
 
-export function BriefHeader({ brief, reusedFrom, actions }: BriefHeaderProps) {
-  const stats = splitStats(brief.statsLine);
+export function BriefHeader({ brief, reusedFrom, actions, identity, stats: givenStats }: BriefHeaderProps) {
+  const stats = givenStats ?? splitStats(brief.statsLine);
   const reusedDate = reusedFrom ? formatReusedDate(reusedFrom) : "";
 
   return (
@@ -44,6 +48,7 @@ export function BriefHeader({ brief, reusedFrom, actions }: BriefHeaderProps) {
           <h1 className="text-[clamp(2rem,1.2rem+3vw,3.25rem)] font-semibold leading-[1.05] tracking-display [overflow-wrap:anywhere]">
             {brief.company}
           </h1>
+          {identity}
 
           {stats.length > 0 ? (
             <ul className="mt-5 flex flex-wrap gap-2">

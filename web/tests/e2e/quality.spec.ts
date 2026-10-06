@@ -44,6 +44,33 @@ test.describe("responsive layout", () => {
   }
 });
 
+test.describe("keyboard", () => {
+  test("tabbing through the top bar keeps your place, and reaches the pinned bar", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`/briefs/${RICH_BRIEF}`);
+    await page.waitForTimeout(SETTLE_MS);
+
+    // Far enough down that the brief's own header has gone and the pinned bar has taken over.
+    await page.evaluate(() => window.scrollTo(0, 700));
+    const pinnedDownload = page.locator("div.fixed").getByRole("link", { name: /download pdf/i });
+    await expect(pinnedDownload).toBeVisible();
+    const place = await page.evaluate(() => window.scrollY);
+    expect(place).toBeGreaterThan(0);
+
+    // The top bar has four stops: the logo, the two tools and the account menu.
+    await page.getByRole("link", { name: /alkira partner tools/i }).focus();
+    for (let stop = 0; stop < 3; stop += 1) {
+      await page.keyboard.press("Tab");
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(place);
+    }
+
+    // The next stop is the pinned bar, still there because the page has not moved.
+    await page.keyboard.press("Tab");
+    await expect(pinnedDownload).toBeFocused();
+    expect(await page.evaluate(() => window.scrollY)).toBe(place);
+  });
+});
+
 test.describe("reduced motion", () => {
   test.use({ contextOptions: { reducedMotion: "reduce" } });
 

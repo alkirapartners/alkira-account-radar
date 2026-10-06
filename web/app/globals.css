@@ -10,6 +10,16 @@
     -webkit-text-size-adjust: 100%;
   }
 
+  /*
+   * The padding above keeps whatever is scrolled to clear of the top bar. The top bar's own
+   * controls sit inside that padding and never move, so a browser that has just focused one
+   * counts it as hidden and scrolls the page up to reveal it, further with every Tab. While
+   * the focus is in the top bar there is nothing to keep clear, so the padding is lifted.
+   */
+  html:has(header.sticky:focus-within) {
+    scroll-padding-top: 0;
+  }
+
   body {
     @apply bg-canvas font-sans text-ink antialiased;
     font-optical-sizing: auto;
