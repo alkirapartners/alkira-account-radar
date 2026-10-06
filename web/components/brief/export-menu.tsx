@@ -33,12 +33,13 @@ const MENU_SURFACE =
 // highlight is the hover state and also marks the keyboard's place.
 const ITEM =
   "group flex h-12 cursor-pointer select-none items-center gap-3 rounded-[10px] px-2 text-[15px] font-medium text-ink " +
-  "transition-[background-color,transform] duration-fast ease-out " +
-  "data-[highlighted]:bg-ink/5 active:scale-[0.98] active:bg-ink/10";
+  "transition-[background-color,transform] duration-fast ease-out motion-reduce:transition-none " +
+  "data-[highlighted]:bg-ink/5 active:scale-[0.98] active:bg-ink/10 motion-reduce:active:scale-100";
 
 const ITEM_ICON =
   "flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-accent/10 text-accent " +
-  "transition-colors duration-fast ease-out group-data-[highlighted]:bg-accent group-data-[highlighted]:text-white";
+  "transition-colors duration-fast ease-out motion-reduce:transition-none " +
+  "group-data-[highlighted]:bg-accent group-data-[highlighted]:text-white";
 
 /**
  * A real link to the file, not a button that fetches it: the browser downloads it with the session

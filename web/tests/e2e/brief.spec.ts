@@ -193,6 +193,7 @@ test.describe("a brief's page", () => {
     // Enter on an option downloads it, as a click does.
     await trigger.focus();
     await page.keyboard.press("Enter");
+    await expect(page.getByRole("menuitem", { name: "PDF" })).toBeFocused();
     await page.keyboard.press("ArrowDown");
     await expect(page.getByRole("menuitem", { name: "Word (.docx)" })).toBeFocused();
     const download = page.waitForEvent("download");

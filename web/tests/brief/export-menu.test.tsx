@@ -72,17 +72,25 @@ describe("a brief that carries a document", () => {
     expect(exportButton()).toHaveClass("h-10");
   });
 
-  it("closes the menu once a download is chosen", async () => {
-    // Following the link is the browser's job; keep the test page where it is.
-    const keepPage = (event: Event) => event.preventDefault();
+  it("closes the menu once a download is chosen, and leaves the link to the browser", async () => {
+    // Records whether the menu cancelled the link, then cancels it itself to keep the test page where it is.
+    const cancelledByMenu: boolean[] = [];
+    const keepPage = (event: Event) => {
+      cancelledByMenu.push(event.defaultPrevented);
+      event.preventDefault();
+    };
     document.addEventListener("click", keepPage);
-    const { exportButton } = setup();
+    try {
+      const { exportButton } = setup();
+      await userEvent.click(exportButton());
+      await userEvent.click(await screen.findByRole("menuitem", { name: "Word (.docx)" }));
+      await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+    } finally {
+      document.removeEventListener("click", keepPage);
+    }
 
-    await userEvent.click(exportButton());
-    await userEvent.click(await screen.findByRole("menuitem", { name: "Word (.docx)" }));
-    document.removeEventListener("click", keepPage);
-
-    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+    // The first click opened the menu and the second chose Word; neither was cancelled before the page's own listener.
+    expect(cancelledByMenu).toEqual([false, false]);
   });
 });
 

@@ -6,6 +6,7 @@ import { DOC_BRIEF, RICH_BRIEF, generateBrief, hasHorizontalOverflow } from "./h
 const SCREENS = [
   { name: "home", path: "/" },
   { name: "brief", path: `/briefs/${RICH_BRIEF}` },
+  { name: "document brief", path: `/briefs/${DOC_BRIEF}` },
   { name: "radar", path: "/radar" },
 ];
 const WIDTHS = [320, 768, 1024, 1440];
@@ -41,6 +42,20 @@ test.describe("the Export menu", () => {
 });
 
 test.describe("responsive layout", () => {
+  test("the open Export menu fits inside a 320px screen", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 800 });
+    await page.goto(`/briefs/${DOC_BRIEF}`);
+    await page.waitForTimeout(SETTLE_MS);
+    await page.getByRole("button", { name: "Export" }).first().click();
+
+    const menu = page.getByRole("menu", { name: "Export" });
+    await expect(menu).toBeVisible();
+    const box = await menu.boundingBox();
+    expect(box?.x).toBeGreaterThanOrEqual(0);
+    expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(320);
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
   for (const screen of SCREENS) {
     for (const width of WIDTHS) {
       test(`${screen.name} fits a ${width}px screen without sideways scrolling`, async ({ page }, testInfo) => {
