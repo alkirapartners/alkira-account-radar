@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { deleteBrief, getBrief, getMe, listBriefs, pdfHref } from "@/lib/brief-api";
+import { deleteBrief, docxHref, getBrief, getMe, listBriefs, pdfHref } from "@/lib/brief-api";
 import { SessionExpiredError } from "@/lib/session";
 
 function json(body: unknown, status = 200): Response {
@@ -64,5 +64,9 @@ describe("brief API client", () => {
 
   it("builds an encoded PDF address", () => {
     expect(pdfHref("a b")).toBe("/api/brief/briefs/a%20b/pdf");
+  });
+
+  it("builds an encoded Word address", () => {
+    expect(docxHref("a b")).toBe("/api/brief/briefs/a%20b/docx");
   });
 });

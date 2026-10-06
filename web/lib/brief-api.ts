@@ -45,3 +45,8 @@ export async function deleteBrief(id: string): Promise<void> {
 export function pdfHref(id: string): string {
   return `${BASE}${briefPath(id)}/pdf`;
 }
+
+/** The Word file, as a plain link target. The API refuses it for a legacy brief, which has no document. */
+export function docxHref(id: string): string {
+  return `${BASE}${briefPath(id)}/docx`;
+}
