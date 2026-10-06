@@ -25,6 +25,18 @@ interface Reply {
 let server: ChildProcess;
 let port = 0;
 
+function post(path: string, body: unknown): Promise<Reply> {
+  return new Promise((resolve, reject) => {
+    const request = http.request({ host: "127.0.0.1", port, path, method: "POST", headers: { "Content-Type": "application/json" } }, (res) => {
+      const chunks: Buffer[] = [];
+      res.on("data", (chunk: Buffer) => chunks.push(chunk));
+      res.on("end", () => resolve({ status: res.statusCode ?? 0, headers: res.headers, body: Buffer.concat(chunks) }));
+    });
+    request.on("error", reject);
+    request.end(JSON.stringify(body));
+  });
+}
+
 function freePort(): Promise<number> {
   return new Promise((resolve, reject) => {
     const probe = net.createServer();
@@ -96,7 +108,7 @@ describe("the mock API's Word route", () => {
   it("refuses a legacy brief, which has no document to write from", async () => {
     const reply = await get(`/api/brief/briefs/${LEGACY_ID}/docx`);
 
-    expect(reply.status).toBe(404);
+    expect(reply.status).toBe(409);
     expect(reply.headers["content-type"]).toBe("application/json");
     expect(JSON.parse(reply.body.toString())).toMatchObject({ success: false, data: null });
   });
@@ -114,5 +126,14 @@ describe("the mock API's Word route", () => {
     expect(withDoc.data.format).toBe(2);
     expect(withDoc.data.doc.company.name).toBe("Harbor Fuels");
     expect(legacy.data.doc ?? null).toBeNull();
+  });
+});
+
+describe("the mock API's daily limit", () => {
+  it("refuses a brief with the real limit of 10 a day", async () => {
+    const reply = await post("/api/brief/briefs", { company: "limit", language: "en" });
+
+    expect(reply.status).toBe(429);
+    expect(JSON.parse(reply.body.toString()).error).toBe("You've reached today's limit of 10 briefs. It resets at midnight UTC.");
   });
 });

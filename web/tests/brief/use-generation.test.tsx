@@ -61,11 +61,11 @@ describe("useGeneration", () => {
 
     await act(() =>
       result.current.start("Acme", async () => {
-        throw new ApiError(429, "You've reached today's limit of 50 briefs.");
+        throw new ApiError(429, "You've reached today's limit of 10 briefs.");
       }),
     );
 
-    expect(result.current.state).toEqual({ status: "error", message: "You've reached today's limit of 50 briefs." });
+    expect(result.current.state).toEqual({ status: "error", message: "You've reached today's limit of 10 briefs." });
   });
 
   it("explains a network failure without leaking the raw error", async () => {

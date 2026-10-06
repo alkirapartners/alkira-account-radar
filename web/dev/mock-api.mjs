@@ -86,7 +86,7 @@ async function streamBrief(res, company, language, replaceId) {
     return fail(res, 409, "A brief is already being written for you. It will appear in your briefs when it finishes.");
   }
   if (key === "limit") {
-    return fail(res, 429, "You've reached today's limit of 50 briefs. It resets at midnight UTC.");
+    return fail(res, 429, "You've reached today's limit of 10 briefs. It resets at midnight UTC.");
   }
 
   const send = openStream(res);
@@ -201,7 +201,7 @@ async function handleBrief(req, res, parts) {
   }
   if (action === "docx") {
     // Like the real API, Word is written from the brief document, so a legacy brief has none to offer.
-    if (!brief.doc) return fail(res, 404, "A Word file is only available for newer briefs.");
+    if (!brief.doc) return fail(res, 409, "A Word file is only available for newer briefs.");
     res.writeHead(200, {
       "Content-Type": DOCX_TYPE,
       "Content-Disposition": `attachment; filename="${downloadName(brief, "docx")}"`,
