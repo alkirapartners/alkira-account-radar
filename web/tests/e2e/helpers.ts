@@ -4,6 +4,7 @@ import { expect, type Page } from "@playwright/test";
 export const RICH_BRIEF = "0b6f2c1e-6f0e-4a57-9a3e-1d2c3b4a5f60";
 export const SPANISH_BRIEF = "9c8b7a65-4321-4fed-b0a9-876543210fed";
 export const SPARSE_BRIEF = "11111111-2222-4333-8444-555555555555";
+export const DOC_BRIEF = "66666666-7777-4888-8999-aaaaaaaaaaaa";
 export const MISSING_BRIEF = "00000000-0000-4000-8000-000000000000";
 
 const BRIEF_URL = /\/briefs\/[0-9a-f-]{36}/;

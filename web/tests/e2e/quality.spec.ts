@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-import { RICH_BRIEF, generateBrief, hasHorizontalOverflow } from "./helpers";
+import { DOC_BRIEF, RICH_BRIEF, generateBrief, hasHorizontalOverflow } from "./helpers";
 
 const SCREENS = [
   { name: "home", path: "/" },
@@ -24,6 +24,20 @@ test.describe("accessibility", () => {
       expect(serious.map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target).join(" | ")}`)).toEqual([]);
     });
   }
+});
+
+test.describe("the Export menu", () => {
+  test("has no serious accessibility violations while it is open", async ({ page }) => {
+    await page.goto(`/briefs/${DOC_BRIEF}`);
+    await page.waitForTimeout(SETTLE_MS);
+    await page.getByRole("button", { name: "Export" }).first().click();
+    await expect(page.getByRole("menu", { name: "Export" })).toBeVisible();
+
+    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+    const serious = results.violations.filter((violation) => ["serious", "critical"].includes(violation.impact ?? ""));
+
+    expect(serious.map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target).join(" | ")}`)).toEqual([]);
+  });
 });
 
 test.describe("responsive layout", () => {

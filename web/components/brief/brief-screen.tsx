@@ -147,6 +147,8 @@ export function BriefScreen({ id }: BriefScreenProps) {
   const actions = (compact: boolean) => (
     <BriefActions
       briefId={id}
+      // Word is written from the brief document, whether or not this page could draw it.
+      hasDocument={data.doc != null}
       disabled={updating || remove.isPending}
       onUpdate={startUpdate}
       onDelete={() => setConfirmingDelete(true)}
