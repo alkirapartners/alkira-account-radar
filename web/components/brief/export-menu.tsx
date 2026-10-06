@@ -25,7 +25,7 @@ interface ExportItemProps {
 
 const MENU_SURFACE =
   "z-50 min-w-[max(var(--radix-dropdown-menu-trigger-width),248px)] origin-[var(--radix-dropdown-menu-content-transform-origin)] " +
-  "rounded-2xl border border-line bg-surface p-1.5 shadow-lift " +
+  "rounded-2xl border border-line bg-surface p-2 shadow-lift " +
   "data-[state=open]:animate-[menu-in_150ms_var(--ease-out)] " +
   "data-[state=closed]:animate-[menu-out_100ms_var(--ease-in)_forwards]";
 
@@ -62,7 +62,9 @@ export function ExportMenu({ briefId, disabled, size, compact }: ExportMenuProps
   const labelId = useId();
 
   return (
-    <Menu.Root>
+    // Not modal: a menu button's menu is not a dialog. A modal menu hides the rest of the page from assistive
+    // technology while its links stay focusable (axe reports that as aria-hidden-focus) and locks scrolling.
+    <Menu.Root modal={false}>
       <Menu.Trigger
         disabled={disabled}
         className={cn(buttonClasses("primary", size), "group data-[state=open]:bg-accent-strong", !compact && "basis-full sm:basis-auto")}
