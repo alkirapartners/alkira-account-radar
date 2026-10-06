@@ -1,5 +1,7 @@
 // Sample data for the local mock API. Shapes mirror the real Brief API and radar API.
 
+import { harborFuels } from "./doc-brief.mjs";
+
 const LABELS = {
   en: {
     alkira_fit: "Alkira Fit",
@@ -226,6 +228,7 @@ export function seedBriefs() {
     MERIDIAN,
     generic("33333333-4444-4555-8666-777777777777", "Halcyon Retail Group", 4, "Retail", ago(3 * DAY)),
     CEMEX,
+    harborFuels(LABELS.en, ago(2 * DAY)),
     generic("44444444-5555-4666-8777-888888888888", "Bluewater Energy", 3, "Energy", ago(6 * DAY)),
     generic("55555555-6666-4777-8888-999999999999", "Corvid Semiconductor", 2, "Semiconductors", ago(8 * DAY)),
     SPARSE,
@@ -250,7 +253,7 @@ export function toSummary(brief) {
 }
 
 export function toDetail(brief) {
-  return { ...brief, labels: LABELS[brief.language] ?? LABELS.en };
+  return { ...brief, labels: brief.labels ?? LABELS[brief.language] ?? LABELS.en };
 }
 
 const RADAR_REASONS = {

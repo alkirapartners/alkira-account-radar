@@ -23,6 +23,30 @@ const PDF = Buffer.from(
     "3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 300 144]>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n",
 );
 
+// A valid Word file with one paragraph ("Mock Word export"), small enough to keep inline.
+const DOCX = Buffer.from(
+  [
+    "UEsDBBQAAAAIAG9LRl15bjPX6AAAAK0BAAATAAAAW0NvbnRlbnRfVHlwZXNdLnhtbH1QyU7DMBD9",
+    "FWuuKHHggBCK0wPLETiUDxjZk8SqN3nc0v49Tlt6QIXjzFv1+tXeO7GjzDYGBbdtB4KCjsaGScHn",
+    "+rV5AMEFg0EXAyk4EMNq6NeHRCyqNrCCuZT0KCXrmTxyGxOFiowxeyz1zJNMqDc4kbzrunupYygU",
+    "SlMWDxj6Zxpx64p42df3qUcmxyCeTsQlSwGm5KzGUnG5C+ZXSnNOaKvyyOHZJr6pBJBXExbk74Cz",
+    "7r0Ok60h8YG5vKGvLPkVs5Em6q2vyvZ/mys94zhaTRf94pZy1MRcF/euvSAebfjpL49zD99QSwME",
+    "FAAAAAgAb0tGXZv9N+qtAAAAKQEAAAsAAABfcmVscy8ucmVsc43POw7CMAwG4KtE3mlaBoRQ0y4I",
+    "qSsqB7ASN61oHkrCo7cnAwNFDIy2f3+W6/ZpZnanECdnBVRFCYysdGqyWsClP232wGJCq3B2lgQs",
+    "FKFt6jPNmPJKHCcfWTZsFDCm5A+cRzmSwVg4TzZPBhcMplwGzT3KK2ri27Lc8fBpwNpknRIQOlUB",
+    "6xdP/9huGCZJRydvhmz6ceIrkWUMmpKAhwuKq3e7yCzwpuarF5sXUEsDBBQAAAAIAG9LRl0gKi9q",
+    "oQAAANkAAAARAAAAd29yZC9kb2N1bWVudC54bWxFjrsOwjAMRX8lyk5TGBCq+tjY2EDMITFtRWNH",
+    "caDt35OUgeVYvtY9ct0tbhIfCDwSNnJflFIAGrIj9o28Xc+7kxQcNVo9EUIjV2DZtfVcWTJvBxhF",
+    "EiBXcyOHGH2lFJsBnOaCPGC6PSk4HdMaejVTsD6QAebkd5M6lOVROT2izMoH2TVPnxEyYnsh8xL3",
+    "1BOweAqxVjnNDBv9xl9T/b9qv1BLAQIUAxQAAAAIAG9LRl15bjPX6AAAAK0BAAATAAAAAAAAAAAA",
+    "AACAAQAAAABbQ29udGVudF9UeXBlc10ueG1sUEsBAhQDFAAAAAgAb0tGXZv9N+qtAAAAKQEAAAsA",
+    "AAAAAAAAAAAAAIABGQEAAF9yZWxzLy5yZWxzUEsBAhQDFAAAAAgAb0tGXSAqL2qhAAAA2QAAABEA",
+    "AAAAAAAAAAAAAIAB7wEAAHdvcmQvZG9jdW1lbnQueG1sUEsFBgAAAAADAAMAuQAAAL8CAAAAAA==",
+  ].join(""),
+  "base64",
+);
+const DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
 let briefs = seedBriefs();
 const batches = new Map();
 
@@ -146,6 +170,8 @@ function batchSummary(batch) {
   };
 }
 
+const downloadName = (brief, extension) => `AlkiraBrief_${brief.company.replace(/[^A-Za-z0-9]+/g, "-")}.${extension}`;
+
 async function handleBrief(req, res, parts) {
   const [, , , resource, id, action] = parts; // ["", "api", "brief", ...]
   if (resource === "health") return ok(res, { status: "ok" });
@@ -169,9 +195,18 @@ async function handleBrief(req, res, parts) {
   if (action === "pdf") {
     res.writeHead(200, {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="AlkiraBrief_${brief.company.replace(/[^A-Za-z0-9]+/g, "-")}.pdf"`,
+      "Content-Disposition": `attachment; filename="${downloadName(brief, "pdf")}"`,
     });
     return res.end(PDF);
+  }
+  if (action === "docx") {
+    // Like the real API, Word is written from the brief document, so a legacy brief has none to offer.
+    if (!brief.doc) return fail(res, 404, "A Word file is only available for newer briefs.");
+    res.writeHead(200, {
+      "Content-Type": DOCX_TYPE,
+      "Content-Disposition": `attachment; filename="${downloadName(brief, "docx")}"`,
+    });
+    return res.end(DOCX);
   }
   if (action === "refresh" && req.method === "POST") {
     const body = await readJson(req);
